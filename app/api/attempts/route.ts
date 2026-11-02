@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
-import { questions } from "@/lib/questions";
+import { questions, type Question } from "@/lib/questions";
+
+type ValidatedAnswer = {
+  question_id: string;
+  category: Question["category"];
+  answer: string;
+  correct: boolean;
+};
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +18,7 @@ export async function POST(request: Request) {
 
     // Kunci jawaban dan skor dihitung ulang di server, bukan mempercayai skor dari browser.
     const questionMap = new Map(questions.map(q => [q.id, q]));
-    const validated = body.answers.map((item: any) => {
+    const validated: ValidatedAnswer[] = body.answers.map((item: any): ValidatedAnswer => {
       const question = questionMap.get(String(item.questionId));
       if (!question) throw new Error("Ada soal yang tidak dikenal.");
       const answer = String(item.answer ?? "");
@@ -26,7 +33,7 @@ export async function POST(request: Request) {
     const db = supabaseAdmin();
     const { data: attempt, error: attemptError } = await db.from("attempts").insert({
       player_id: body.playerId,
-      score: validated.filter(a => a.correct).length,
+      score: validated.filter((a: ValidatedAnswer) => a.correct).length,
       total: validated.length
     }).select("id").single();
     if (attemptError) throw attemptError;
