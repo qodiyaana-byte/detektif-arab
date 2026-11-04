@@ -9,6 +9,13 @@ type AnswerRecord = { questionId: string; category: string; answer: string; corr
 type PositionScore = { score: number; total: number };
 type MaterialCard = { arabic: string; meaning: string; picture: string; note: string };
 
+const learningScenes: Record<number, string> = {
+  1: "/images/keluarga.jpg",
+  2: "/images/kakek-nenek.jpg",
+  3: "/images/ruang-keluarga.jpg",
+  4: "/images/ruang-keluarga.jpg",
+};
+
 const positions = [
   { id: 1, title: "Rumah Kata", subtitle: "Kosakata kegiatan sehari-hari di rumah", icon: "🏡", color: "sand", kind: "materi" },
   { id: 2, title: "Rahasia Kosakata", subtitle: "Pendalaman kata dan ungkapan sederhana", icon: "🗝️", color: "mint", kind: "materi" },
@@ -166,12 +173,12 @@ export default function Page() {
 
     {screen === "home" && <section className="hero adventure-hero">
       <div className="hero-copy"><span className="eyebrow"><Sparkles size={15} /> PETUALANGAN BAHASA ARAB KELAS VII</span>
-        <h1>Jelajahi Rumah,<br /><em>Temukan Kata!</em></h1>
-        <p>Ikuti jejak petualangan, temukan kosakata kegiatan sehari-hari, kenali isim dan fi'il, lalu tuntaskan tujuh pos tantangan.</p>
+        <h1>Detektif Arab:<br /><em>Misi di Rumah!</em></h1>
+        <p>Bantu Sami menjelajahi rumah, menemukan kosakata kegiatan sehari-hari, mengenali isim dan fi'il, lalu menyelesaikan tujuh pos petualangan.</p>
         <div className="hero-actions"><button className="primary" onClick={() => setScreen("identity")}>Mulai Petualangan <ArrowRight size={18} /></button><button className="secondary" onClick={() => document.getElementById("cara-bermain")?.scrollIntoView({ behavior: "smooth" })}>Cara Bermain</button></div>
-        <div className="hero-stats"><span><b>7</b> Pos petualangan</span><span><b>50</b> Soal evaluasi utama</span><span><b>Arab</b> + Indonesia</span></div>
+        <div className="hero-stats"><span><b>7</b> Pos petualangan</span><span><b>56</b> Soal latihan dan evaluasi</span><span><b>Bahasa Arab</b> dan Indonesia</span></div>
       </div>
-      <div className="hero-art adventure-art"><div className="sun" /><div className="cloud cloud-one" /><div className="house"><div className="roof" /><div className="window" /><div className="door" /></div><div className="detective">🕵🏻</div><div className="plant">🌿</div><div className="floating-card"><span>يَقْرَأُ</span><small>Membaca</small></div></div>
+      <div className="hero-art adventure-art"><img className="hero-reference-image" src="/images/detektif-cover.jpg" alt="Ilustrasi detektif anak menjelajahi rumah keluarga" /></div>
     </section>}
 
     {screen === "identity" && <section className="center-panel identity-panel">
@@ -195,7 +202,7 @@ export default function Page() {
             <span className="stop-copy"><small>POS {String(item.id).padStart(2, "0")}</small><b>{item.title}</b><em>{done ? "Selesai" : unlocked ? item.kind : "Terkunci"}</em></span>
           </button>;
         })}
-        <div className="map-treasure">🏆<small>FINISH</small></div>
+        <div className="map-treasure">🏆<small>TAMAT</small></div>
       </div>
       <div className="map-legend"><span><i className="legend-open" /> Pos terbuka</span><span><i className="legend-done" /> Pos selesai</span><span><i className="legend-lock" /> Pos terkunci</span></div>
       <div className="tip-box"><span>🧭</span><p><b>Petunjuk perjalanan:</b> Mulailah dari Pos 1. Pelajari materi, kerjakan cek pemahaman, lalu lanjutkan ke pos berikutnya. Kamu dapat membuka kembali pos yang sudah selesai.</p></div>
@@ -204,7 +211,7 @@ export default function Page() {
     {screen === "learn" && <section className="content-section learning-screen">
       <button className="back-link" onClick={() => setScreen("map")}><ArrowLeft size={16} /> Kembali ke peta</button>
       <div className="learning-heading"><div><span className="eyebrow">POS {String(position).padStart(2, "0")} · TAHAP BELAJAR</span><h2>{positions[position - 1].title}</h2><p>{positions[position - 1].subtitle}</p></div><span className="progress-label">Materi {cardIndex + 1} dari {currentMaterials.length}</span></div>
-      <div className="learning-card adventure-learning-card"><div className="learning-illustration"><span>{currentMaterials[cardIndex]?.picture}</span><small>AMATI GAMBAR</small></div><div className="word-content"><span className="eyebrow"><BookOpen size={14} /> KARTU MATERI</span><div className="arabic-word" dir="rtl">{currentMaterials[cardIndex]?.arabic}</div><h3>{currentMaterials[cardIndex]?.meaning}</h3><p className="learning-note">{currentMaterials[cardIndex]?.note}</p><button className="audio-button" onClick={() => speak(currentMaterials[cardIndex]?.arabic || "")}><Volume2 size={18} /> Dengarkan pelafalan</button>
+      <div className="learning-card adventure-learning-card"><div className="learning-illustration" style={{ backgroundImage: `linear-gradient(180deg, rgba(18,49,88,.02), rgba(18,49,88,.24)), url(${learningScenes[position] || "/images/rumah-keluarga.jpg"})` }}><span>{currentMaterials[cardIndex]?.picture}</span><small>AMATI ILUSTRASI</small></div><div className="word-content"><span className="eyebrow"><BookOpen size={14} /> KARTU MATERI</span><div className="arabic-word" dir="rtl">{currentMaterials[cardIndex]?.arabic}</div><h3>{currentMaterials[cardIndex]?.meaning}</h3><p className="learning-note">{currentMaterials[cardIndex]?.note}</p><button className="audio-button" onClick={() => speak(currentMaterials[cardIndex]?.arabic || "")}><Volume2 size={18} /> Dengarkan pelafalan</button>
         <div className="word-dots">{currentMaterials.map((_, index) => <span key={index} className={index <= cardIndex ? "active" : ""} />)}</div>
         <button className="primary" onClick={() => { if (cardIndex < currentMaterials.length - 1) setCardIndex(cardIndex + 1); else finishMaterial(); }}>{cardIndex < currentMaterials.length - 1 ? "Materi Berikutnya" : "Mulai Cek Pemahaman"} <ArrowRight size={18} /></button>
       </div></div>
@@ -215,9 +222,11 @@ export default function Page() {
     {screen === "quiz" && currentQuestion && <section className="quiz-wrap adventure-quiz-wrap">
       <div className="quiz-top"><button className="back-link" onClick={() => setScreen("map")}><ArrowLeft size={16} /> Kembali ke peta</button><span>POS {position} · SOAL {questionIndex + 1}/{activeQuestions.length}</span></div>
       <div className="progress-track"><div style={{ width: `${((questionIndex + 1) / activeQuestions.length) * 100}%` }} /></div>
-      <div className="quiz-card adventure-quiz-card"><div className="quiz-card-meta"><span className="eyebrow">{questionLabel(currentQuestion)}</span><span className="question-counter">{questionIndex + 1} / {activeQuestions.length}</span></div><h2>{currentQuestion.prompt}</h2>
-        {currentQuestion.picture && <div className="question-picture">{currentQuestion.picture}</div>}
-        {currentQuestion.arabic && <div className="arabic-question" dir="rtl">{currentQuestion.arabic}<button aria-label="Dengarkan" onClick={() => speak(currentQuestion.arabic || "")}><Volume2 size={18} /></button></div>}
+      <div className="quiz-card adventure-quiz-card"><div className="quiz-card-meta"><span className="eyebrow">{questionLabel(currentQuestion)}</span><span className="question-counter">{questionIndex + 1} / {activeQuestions.length}</span></div>
+        {currentQuestion.type === "picture" && currentQuestion.picture && <div className="question-picture" role="img" aria-label="Ilustrasi petunjuk soal"><span>{currentQuestion.picture}</span></div>}
+        <h2>{currentQuestion.prompt}</h2>
+        {currentQuestion.type !== "picture" && currentQuestion.picture && <div className="question-picture" role="img" aria-label="Ilustrasi petunjuk soal"><span>{currentQuestion.picture}</span></div>}
+        {currentQuestion.type !== "picture" && currentQuestion.arabic && <div className="arabic-question" dir="rtl">{currentQuestion.arabic}<button aria-label="Dengarkan" onClick={() => speak(currentQuestion.arabic || "")}><Volume2 size={18} /></button></div>}
         <div className="answer-grid">{currentQuestion.options.map((option, index) => <button key={option} className={`answer-option ${selected === option ? "selected" : ""}`} onClick={() => setSelected(option)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}</div>
         <button className="primary full" disabled={!selected} onClick={submitAnswer}>{questionIndex === activeQuestions.length - 1 ? position === 7 ? "Selesaikan Petualangan" : "Selesaikan Pos" : "Jawaban Berikutnya"} <ArrowRight size={18} /></button>
       </div>

@@ -61,3 +61,12 @@ Jalankan SQL pada `supabase/schema.sql` di Supabase SQL Editor. Service role key
 ## Catatan penilaian
 
 Nilai setiap pos dihitung dari jawaban benar dibandingkan jumlah soal pada pos tersebut. Nilai keseluruhan dihitung dari seluruh 56 soal. Server memvalidasi ulang kunci jawaban sebelum menyimpan hasil. Bank soal tetap perlu ditinjau guru agar selaras dengan tujuan pembelajaran dan kosakata yang diajarkan.
+
+
+## Revisi tampilan berdasarkan Inovasi Media (INGG)
+
+- Menggunakan ilustrasi rumah, keluarga, ruang keluarga, dan kakek-nenek dari dokumen referensi yang diberikan. Peta petualangan tetap memakai ilustrasi jalur tanpa tulisan bahasa Inggris.
+- Palet warna diperbarui menjadi hijau, biru, kuning, dan aksen merah muda seperti referensi permainan pada dokumen.
+- Teks antarmuka menggunakan bahasa Indonesia.
+- Pada soal bertipe tebak gambar, pertanyaan hanya menampilkan gambar dan instruksi. Lafaz Arab tampil pada pilihan jawaban, bukan pada teks soal atau panel lafaz terpisah.
+- Alur login, tujuh pos berurutan, penilaian per pos, nilai keseluruhan, dan API penyimpanan tetap dipertahankan.

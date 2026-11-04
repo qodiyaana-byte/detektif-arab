@@ -13,3 +13,79 @@
 .adventure-result-panel{max-width:940px;margin:45px auto 70px;padding:38px;background:#fffefa;border:1px solid var(--line);border-radius:30px;box-shadow:0 14px 38px #4d5a3010}.adventure-result-panel .trophy{color:#d39a45}.adventure-result-panel>p{color:var(--muted);line-height:1.7}.adventure-result-panel .big-score{font-size:76px;color:#d18d4d;margin:20px 0 0}.achievement-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:28px 0}.achievement-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:15px 8px;background:#f6f5ec;border:1px solid #ece8d9;border-radius:16px}.achievement-card>span{font-size:24px}.achievement-card small{font-size:9px;letter-spacing:1px;font-weight:1000;color:#9b825c}.achievement-card b{font-size:17px;color:#40513f}.achievement-card em{font-size:10px;font-style:normal;color:#899181}.result-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}.result-summary div{background:#edf1e7;border-radius:15px;padding:15px;display:flex;flex-direction:column;gap:6px}.result-summary span{font-size:11px;color:#7d8877}.result-summary b{font-size:16px;color:#435541}.save-status{margin:18px 0;padding:13px;background:#f7f3e8;border-radius:12px;color:#8b774f;font-size:12px}.adventure-result-panel .hero-actions{justify-content:center}
 @media(max-width:850px){.map-welcome{align-items:flex-start;flex-direction:column}.map-progress-card{width:100%;grid-template-columns:58px 1fr}.adventure-map{height:650px}.map-stop{min-width:165px;max-width:185px;padding:9px}.stop-marker{width:43px;height:43px}.stop-copy b{font-size:11px}.stop-1{left:3%;top:7%}.stop-2{left:36%;top:16%}.stop-3{left:7%;top:34%}.stop-4{right:3%;top:44%}.stop-5{right:4%;bottom:8%}.stop-6{left:34%;bottom:21%}.stop-7{left:3%;bottom:5%}.map-treasure{left:43%;top:49%}.trail-svg{opacity:.65}.achievement-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:560px){.adventure-map{height:760px;border-width:5px}.map-stop{min-width:150px;max-width:168px;gap:7px}.stop-marker{width:38px;height:38px;font-size:21px}.stop-copy b{font-size:10px}.stop-copy small,.stop-copy em{font-size:8px}.stop-1{left:3%;top:4%}.stop-2{right:2%;left:auto;top:15%}.stop-3{left:3%;top:28%}.stop-4{right:2%;top:40%}.stop-5{left:3%;right:auto;bottom:29%}.stop-6{right:2%;left:auto;bottom:16%}.stop-7{left:3%;bottom:3%}.map-treasure{left:45%;top:52%;font-size:34px}.trail-svg{opacity:.35}.map-legend{gap:12px}.adventure-learning-card{grid-template-columns:1fr}.adventure-learning-card .learning-illustration{min-height:190px}.learning-illustration>span{font-size:88px}.adventure-learning-card .word-content{padding:24px}.adventure-quiz-card{padding:22px}.adventure-quiz-card .answer-grid{grid-template-columns:1fr}.achievement-grid{grid-template-columns:repeat(2,1fr)}.result-summary{grid-template-columns:1fr}.adventure-result-panel{padding:24px 16px}.adventure-result-panel .big-score{font-size:62px}.learning-heading{align-items:flex-start;gap:12px;flex-direction:column}}
+
+
+/* Revisi visual berdasarkan dokumen Inovasi Media (INGG) */
+:root{
+  --orange:#f5b928;
+  --cream:#f4f9e9;
+  --sage:#77bd68;
+  --mint:#bce8c9;
+  --ink:#173b65;
+  --muted:#64778a;
+  --white:#ffffff;
+  --line:#d8e9d4;
+}
+body{background:linear-gradient(180deg,#f2faed 0%,#fff9e9 58%,#eef8ed 100%);color:#173b65}
+.topbar{border-bottom:2px solid #dcebd5}
+.brand-mark{background:#d9f2d9;border:2px solid #9bd79d}
+.brand small,footer span{color:#168c69}
+.topbar nav button,.topbar nav a{color:#24527d}
+.lang-pill,.score-chip{background:#dff4df;color:#18734f}
+.eyebrow{color:#168c69}
+.hero h1{color:#173b65}
+.hero h1 em{color:#e69b16}
+.primary{background:linear-gradient(135deg,#20a96b,#168f79);box-shadow:0 7px 18px #168f7935}
+.secondary{background:#fff0bd;color:#755318;border:1px solid #f2d778}
+.hero-art.adventure-art{background:#d7f2e5;border:7px solid #ffffff;box-shadow:0 16px 35px #1c6a4a1b;border-radius:34px}
+.hero-reference-image{width:100%;height:100%;object-fit:contain;object-position:center bottom;padding:8px}
+.how-section{border-top-color:#d7e9d1}
+.how-grid>div,.center-panel,.learning-card,.result-panel{border-color:#d9e9d3;box-shadow:0 12px 28px #225c3d12}
+.how-grid>div{background:#ffffff}
+.center-panel{background:#ffffff}
+.center-panel input{border-color:#cfe2d1;background:#fbfff8}
+.center-panel input:focus{border-color:#32a66e;box-shadow:0 0 0 3px #32a66e22}
+.map-progress-card{border-color:#d1e7ce;background:#fff}
+.progress-ring{border-color:#e2f1dd;color:#176a50}
+.map-progress-track i{background:#24a76b}
+.adventure-map{background:radial-gradient(ellipse at 15% 20%,#e5f3c9 0 13%,transparent 14%),radial-gradient(ellipse at 75% 75%,#d2ebc6 0 15%,transparent 16%),linear-gradient(135deg,#cfe8ad,#d9efc8 48%,#f4e8bb);border:8px solid #ffffff;box-shadow:0 16px 38px #36764a22}
+.adventure-map:before{background-image:radial-gradient(#85a96a 1px,transparent 1px);background-size:25px 25px;opacity:.18}
+.map-map-caption{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;border-radius:14px;background:rgba(255,255,255,.84);color:#1b5b49;text-align:center;box-shadow:0 5px 15px #285b3822;pointer-events:none}
+.map-map-caption b{font-size:11px;letter-spacing:1.3px}.map-map-caption span{font-size:10px}
+.map-stop{border:2px solid #fff;background:#fffef8;box-shadow:0 8px 20px #1d51372b}
+.stop-marker{background:#ffdf73;color:#17456a}
+.stop-copy small{color:#168c69}.stop-copy b{color:#173b65}.map-stop.locked{background:#f2f4e9}.map-stop.done{border-color:#35b96e}.map-stop.done .stop-marker{background:#35b96e;color:#fff}
+.trail-svg path{stroke:#f0a928;stroke-width:10;stroke-dasharray:5 16}
+.map-legend{color:#486a5a}.legend-open{background:#f0b52a}.legend-done{background:#2aa96d}.legend-lock{background:#9daaa2}
+.tip-box{background:#e4f4e4;border-color:#cbe8ce;color:#315d4b}
+.learning-card{background:#fff;border-color:#d5e8d5}
+.adventure-learning-card .learning-illustration{background-size:cover;background-position:center;position:relative;min-height:360px}
+.adventure-learning-card .learning-illustration:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(12,42,66,.35))}
+.learning-illustration>span{position:relative;z-index:1;display:grid;place-items:center;width:104px;height:104px;border-radius:28px;background:rgba(255,255,255,.88);border:4px solid #ffda68;font-size:62px}
+.learning-illustration small{position:relative;z-index:1;background:rgba(18,57,83,.82);color:#fff;padding:8px 13px;border-radius:20px;letter-spacing:1px}
+.adventure-learning-card .arabic-word{color:#176b91}
+.audio-button{background:#e6f7e9;color:#19704e;border-color:#bfe5c8}
+.word-dots span.active{background:#23a96d}
+.concept-note{background:#fff2c7;color:#6a5a2c;border:1px solid #f2df9b}.concept-note b{color:#244c6a}
+.adventure-quiz-card{background:#123c70;color:#fff;border:10px solid #2eb96e;outline:3px solid #f05c91;outline-offset:-17px;border-radius:28px;box-shadow:0 16px 34px #173b6533,inset 0 0 0 3px #f4c944}
+.adventure-quiz-card h2{color:#fff;text-align:center;background:rgba(255,255,255,.1);border-radius:14px;padding:14px 16px}
+.adventure-quiz-card .eyebrow{color:#ffe27c}
+.question-counter{background:#f8d95e;color:#173b65}
+.question-picture{width:min(240px,70%);height:170px;background:#fff;border:5px solid #f5cf4d;border-radius:22px;color:#173b65;box-shadow:0 8px 18px #061c3a44}
+.question-picture span{font-size:92px;filter:drop-shadow(0 5px 2px #173b6520)}
+.adventure-quiz-card .arabic-question{background:#fff4c9;color:#173b65}
+.adventure-quiz-card .answer-grid{gap:13px}
+.adventure-quiz-card .answer-option{background:#fff;color:#173b65;border:3px solid #f4d65e;border-radius:14px;min-height:76px;font-family:Nunito,'Noto Naskh Arabic',sans-serif;font-size:18px;justify-content:flex-start}
+.adventure-quiz-card .answer-option span{background:#e4f4e7;color:#176d50}
+.adventure-quiz-card .answer-option.selected{background:#fff0b8;border-color:#ff8aab;box-shadow:0 0 0 3px #ff8aab55}
+.adventure-quiz-card .answer-option.selected span{background:#ed5b91;color:#fff}
+.adventure-quiz-card .primary{background:linear-gradient(135deg,#f3c83e,#f0a928);color:#173b65;box-shadow:0 6px 16px #f3c83e44}
+.adventure-quiz-card .primary:disabled{background:#a9b8c8;color:#fff}
+.adventure-result-panel{background:#fff;border-color:#d7e9d4}
+.adventure-result-panel .trophy{color:#f0b52a}
+.adventure-result-panel .big-score{color:#168e68}
+.achievement-card{background:#f0f8e9;border-color:#dcebd2}.achievement-card b{color:#173b65}
+.result-summary div{background:#e5f4e6}.result-summary b{color:#1a654d}
+.save-status{background:#fff2c7;color:#775e26}
+.teacher-page{background:#f3f9ec;color:#173b65}.teacher-login{background:#fff;border-color:#d9e9d3}
+@media(max-width:560px){.adventure-quiz-card{border-width:7px;padding:19px;outline-offset:-13px}.question-picture{height:145px}.question-picture span{font-size:76px}.adventure-learning-card .learning-illustration{min-height:220px}}
