@@ -1,26 +1,38 @@
-# Detektif Arab — Misi Keluargaku
+# Detektif Arab: Peta Petualangan 7 Pos
 
-Aplikasi permainan edukasi bahasa Arab untuk siswa kelas VII. Antarmuka menggunakan **Bahasa Indonesia dan Bahasa Arab** saja.
+Media pembelajaran bahasa Arab kelas VII dengan alur petualangan berurutan. Setelah siswa login, aplikasi menampilkan peta tujuh pos. Siswa harus menuntaskan pos sebelumnya untuk membuka pos berikutnya.
 
-## Fitur yang tersedia
+## Alur pembelajaran
 
-- Halaman pembuka dan identitas pemain.
-- Peta empat misi.
-- Kartu mufradat dengan harakat dan pelafalan melalui fitur suara peramban (jika tersedia).
-- Tantangan pilihan ganda: mufradat, isim–fi'il, dan pemahaman konteks.
-- Hasil evaluasi per kategori.
-- Penyimpanan pemain dan hasil ke Supabase.
-- Dashboard guru dengan token akses dan ekspor CSV.
+1. **Pos 1: Rumah Kata.** Kosakata kegiatan sehari-hari di rumah. Terdapat 10 kartu materi dan 3 soal cek pemahaman.
+2. **Pos 2: Rahasia Kosakata.** Pendalaman kosakata dalam frasa dan kalimat sederhana. Terdapat 6 kartu materi dan 3 soal cek pemahaman.
+3. **Pos 3: Detektif Isim.** Materi isim yang terkait dengan benda dan tempat di rumah, lalu 10 soal.
+4. **Pos 4: Detektif Fi'il.** Materi fi'il yang terkait dengan kegiatan sehari-hari, lalu 10 soal ringan.
+5. **Pos 5: Tantangan Campuran.** 10 soal tebak gambar, isim, fi'il, dan kosakata.
+6. **Pos 6: Misi Detektif.** 10 soal penerapan isim dan fi'il dalam konteks.
+7. **Pos 7: Tantangan Final.** 10 soal evaluasi integratif.
+
+Total terdapat 56 soal: 3 soal Pos 1, 3 soal Pos 2, dan masing-masing 10 soal pada Pos 3 sampai Pos 7. Soal Pos 1 dan 2 merupakan cek pemahaman singkat agar setiap pos memiliki nilai.
+
+## Fitur
+
+- Identitas siswa dan kode kelas.
+- Peta petualangan dengan status pos terbuka, selesai, dan terkunci.
+- Pembukaan pos secara berurutan.
+- Kartu materi Arab berharakat, arti bahasa Indonesia, ilustrasi, dan pelafalan browser.
+- Soal pilihan ganda dengan tipe tebak gambar, arti kosakata, isim, fi'il, dan pemahaman kalimat.
+- Rekap nilai setiap pos dan nilai keseluruhan setelah Pos 7.
+- Penyimpanan hasil ke Supabase dan dashboard guru di `/guru`.
 
 ## Teknologi
 
-- Next.js App Router + TypeScript
-- Supabase (PostgreSQL)
-- Vercel untuk deployment
+- Next.js 15 App Router + TypeScript
+- Supabase PostgreSQL
+- Vercel
 
-## 1. Persiapan lokal
+## Persiapan lokal
 
-Pastikan Node.js 20.9 atau lebih baru terpasang.
+Gunakan Node.js 20.9 atau lebih baru.
 
 ```bash
 npm install
@@ -28,18 +40,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Buka http://localhost:3000.
-
-Tanpa konfigurasi Supabase, halaman permainan tetap dapat dicoba, tetapi penyimpanan hasil dan dashboard guru tidak akan aktif.
-
-## 2. Konfigurasi Supabase
-
-1. Buat proyek di https://supabase.com.
-2. Buka **SQL Editor**.
-3. Salin dan jalankan isi `supabase/schema.sql`.
-4. Buka **Project Settings → API**.
-5. Salin Project URL, anon key, dan service_role key.
-6. Isi `.env.local`:
+Isi `.env.local` dengan konfigurasi Supabase:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
@@ -48,62 +49,15 @@ SUPABASE_SERVICE_ROLE_KEY=...
 TEACHER_DASHBOARD_TOKEN=buat-token-rahasia-yang-panjang-dan-unik
 ```
 
-Penting: service role key dan token guru hanya boleh menjadi environment variable server. Jangan beri awalan `NEXT_PUBLIC_` dan jangan commit `.env.local` ke GitHub.
+Jalankan SQL pada `supabase/schema.sql` di Supabase SQL Editor. Service role key dan token guru hanya boleh disimpan sebagai environment variable server, bukan variabel `NEXT_PUBLIC_`.
 
-## 3. Menjalankan dan menguji
+## Deploy Vercel
 
-```bash
-npm run dev
-```
+1. Commit dan push source code ke GitHub.
+2. Pastikan environment variables Supabase dan token guru telah diatur pada Vercel.
+3. Jalankan deployment.
+4. Uji login siswa, penyelesaian tujuh pos, rekap nilai, dan dashboard guru.
 
-Alur pengujian:
-1. Masuk ke halaman utama.
-2. Tekan **Mulai Petualangan**.
-3. Isi nama panggilan dan kode kelas.
-4. Buka misi, pelajari kartu kosakata, dan gunakan tombol pelafalan.
-5. Selesaikan 10 soal evaluasi.
-6. Buka `/guru`, masukkan token dashboard, lalu periksa hasil.
-7. Coba ekspor CSV.
+## Catatan penilaian
 
-## 4. Deploy ke Vercel
-
-1. Buat repository GitHub dan unggah seluruh isi folder proyek.
-2. Masuk ke https://vercel.com lalu pilih **Add New → Project**.
-3. Impor repository GitHub tersebut.
-4. Tambahkan environment variables yang sama dengan `.env.local` pada **Project Settings → Environment Variables**.
-5. Deploy.
-6. Setelah deployment selesai, uji halaman permainan dan `/guru`.
-
-Setiap perubahan yang di-push ke branch produksi akan memicu deployment baru sesuai konfigurasi Vercel.
-
-## 5. Struktur folder
-
-```text
-detektif-arab/
-├── app/
-│   ├── api/
-│   │   ├── players/route.ts
-│   │   ├── attempts/route.ts
-│   │   └── reports/route.ts
-│   ├── guru/page.tsx
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── lib/
-│   ├── questions.ts
-│   └── supabase-server.ts
-├── supabase/schema.sql
-├── .env.example
-├── package.json
-└── README.md
-```
-
-## Catatan penting sebelum digunakan di kelas
-
-- Ini adalah fondasi aplikasi yang dapat dijalankan dan dikembangkan, bukan sistem ujian terstandar.
-- Pelafalan menggunakan Web Speech API perangkat. Ketersediaan suara Arab berbeda-beda antarperamban dan perangkat. Untuk penggunaan kelas yang konsisten, ganti dengan rekaman audio penutur bahasa Arab yang telah diperiksa.
-- Dashboard guru menggunakan satu token rahasia server. Untuk penggunaan sekolah dalam skala besar, tingkatkan menjadi autentikasi guru berbasis Supabase Auth, pembatasan percobaan, dan kebijakan akses berbasis peran.
-- Saat ini identitas siswa menggunakan nama panggilan dan kode kelas, bukan akun/password. Hindari memasukkan data pribadi sensitif.
-- Soal dan bobot penilaian masih berupa contoh awal. Tinjau kesesuaian dengan ATP/modul ajar dan tujuan pembelajaran yang digunakan.
-- Kunci jawaban dan skor dihitung ulang di API server dari bank soal, bukan mempercayai nilai benar/salah yang dikirim browser. Tetap lakukan pengujian keamanan sebelum penggunaan skala sekolah.
-- Tambahkan tes awal dan tes tertunda bila media digunakan untuk penelitian efektivitas pembelajaran.
+Nilai setiap pos dihitung dari jawaban benar dibandingkan jumlah soal pada pos tersebut. Nilai keseluruhan dihitung dari seluruh 56 soal. Server memvalidasi ulang kunci jawaban sebelum menyimpan hasil. Bank soal tetap perlu ditinjau guru agar selaras dengan tujuan pembelajaran dan kosakata yang diajarkan.
