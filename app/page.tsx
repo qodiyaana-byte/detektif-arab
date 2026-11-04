@@ -1,9 +1,9 @@
 "use client";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, LockKeyhole, MapPinned, Medal, Sparkles, Trophy, Volume2, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, LockKeyhole, MapPinned, Medal, Sparkles, Trophy, RotateCcw } from "lucide-react";
 import { questions, type Question } from "@/lib/questions";
 
-type Screen = "home" | "identity" | "map" | "learn" | "quiz" | "result";
+type Screen = "home" | "identity" | "map" | "learn" | "quiz" | "position-result" | "result";
 type Player = { id: string; nickname: string; classCode: string };
 type AnswerRecord = { questionId: string; category: string; answer: string; correct: boolean };
 type PositionScore = { score: number; total: number };
@@ -20,7 +20,7 @@ const positions = [
   { id: 1, title: "Rumah Kata", subtitle: "Kosakata kegiatan sehari-hari di rumah", icon: "🏡", color: "sand", kind: "materi" },
   { id: 2, title: "Rahasia Kosakata", subtitle: "Pendalaman kata dan ungkapan sederhana", icon: "🗝️", color: "mint", kind: "materi" },
   { id: 3, title: "Detektif Isim", subtitle: "Mengenali kata benda di sekitar rumah", icon: "🔎", color: "blue", kind: "materi + soal" },
-  { id: 4, title: "Detektif Fi'il", subtitle: "Mengenali kegiatan dan tindakan", icon: "⚡", color: "peach", kind: "materi + soal" },
+  { id: 4, title: "Misi Perbandingan Isim dan Fi'il", subtitle: "Membedakan nama benda dan kata tindakan", icon: "⚖️", color: "peach", kind: "materi + soal" },
   { id: 5, title: "Tantangan Campuran", subtitle: "10 soal tebak gambar, isim, dan fi'il", icon: "🧩", color: "purple", kind: "10 soal" },
   { id: 6, title: "Misi Detektif", subtitle: "10 soal penerapan dalam konteks", icon: "🧭", color: "blue", kind: "10 soal" },
   { id: 7, title: "Tantangan Final", subtitle: "10 soal evaluasi seluruh materi", icon: "🏆", color: "gold", kind: "10 soal" },
@@ -48,16 +48,20 @@ const materials: Record<number, MaterialCard[]> = {
     { arabic: "أَنَا أَنَامُ لَيْلًا", meaning: "Saya tidur pada malam hari", picture: "🌜", note: "لَيْلًا berarti pada malam hari." },
   ],
   3: [
-    { arabic: "بَيْتٌ", meaning: "Rumah", picture: "🏠", note: "Isim adalah kata yang menunjukkan nama orang, benda, tempat, atau sesuatu." },
-    { arabic: "مَطْبَخٌ", meaning: "Dapur", picture: "🍳", note: "Nama tempat di dalam rumah. Karena menamai tempat, kata ini termasuk isim." },
-    { arabic: "كِتَابٌ", meaning: "Buku", picture: "📘", note: "Nama benda yang dapat dilihat dan digunakan untuk membaca." },
-    { arabic: "مَاءٌ", meaning: "Air", picture: "💧", note: "Nama benda. Kata ini termasuk isim, bukan kegiatan." },
+    { arabic: "الِاسْمُ", meaning: "Pengertian isim", picture: "🏷️", note: "Isim adalah kata yang menunjukkan nama orang, hewan, benda, tempat, atau sesuatu. Contoh: طَالِبٌ (siswa), بَيْتٌ (rumah), مَدْرَسَةٌ (sekolah)." },
+    { arabic: "كِتَابٌ ← الْكِتَابُ", meaning: "Ciri isim: tanwin dan ال", picture: "📘", note: "Banyak isim dapat menerima tanwin, seperti كِتَابٌ. Isim juga dapat memakai ال, menjadi الْكِتَابُ." },
+    { arabic: "الطَّالِبُ", meaning: "Siswa", picture: "🧑🏻‍🎓", note: "الطَّالِبُ adalah isim karena menamai orang. Isim juga dapat menunjukkan nama orang atau profesi." },
+    { arabic: "الْمَدْرَسَةُ", meaning: "Sekolah", picture: "🏫", note: "الْمَدْرَسَةُ adalah isim karena menamai tempat." },
+    { arabic: "الْفِعْلُ", meaning: "Pengertian fi'il", picture: "🏃🏻", note: "Fi'il adalah kata yang menunjukkan pekerjaan, tindakan, atau kejadian. Contoh: يَكْتُبُ (menulis), يَقْرَأُ (membaca)." },
+    { arabic: "يَكْتُبُ", meaning: "Dia sedang/akan menulis", picture: "✍️", note: "Fi'il mudhari' menunjukkan kegiatan yang sedang atau akan dilakukan. Salah satu cirinya sering diawali أ، ن، ي، atau ت." },
+    { arabic: "يَقْرَأُ", meaning: "Dia sedang/akan membaca", picture: "📖", note: "يَقْرَأُ adalah fi'il karena menyatakan tindakan membaca, bukan nama benda." },
   ],
   4: [
-    { arabic: "يَأْكُلُ", meaning: "Dia sedang makan", picture: "🍽️", note: "Fi'il adalah kata yang menunjukkan pekerjaan atau tindakan." },
-    { arabic: "يَشْرَبُ", meaning: "Dia sedang minum", picture: "🥤", note: "Kata ini menunjukkan kegiatan yang dilakukan seseorang." },
-    { arabic: "يَقْرَأُ", meaning: "Dia sedang membaca", picture: "📚", note: "Perhatikan perbedaannya: كِتَابٌ berarti buku (isim), يَقْرَأُ berarti membaca (fi'il)." },
-    { arabic: "يَنَامُ", meaning: "Dia sedang tidur", picture: "😴", note: "Kata ini menunjukkan tindakan atau kegiatan." },
+    { arabic: "كِتَابٌ", meaning: "Buku (isim)", picture: "📚", note: "Isim menamai benda. Buku dapat dilihat dan dipegang. Kata كِتَابٌ menjawab pertanyaan: benda apa?" },
+    { arabic: "يَقْرَأُ", meaning: "Membaca (fi'il)", picture: "📖", note: "Fi'il menunjukkan tindakan. يَقْرَأُ menjawab pertanyaan: sedang melakukan apa?" },
+    { arabic: "قَلَمٌ", meaning: "Pena (isim)", picture: "🖊️", note: "قَلَمٌ adalah nama benda sehingga termasuk isim." },
+    { arabic: "يَكْتُبُ", meaning: "Menulis (fi'il)", picture: "✍️", note: "يَكْتُبُ menunjukkan tindakan menulis sehingga termasuk fi'il." },
+    { arabic: "الطَّالِبُ يَكْتُبُ", meaning: "Siswa sedang menulis", picture: "🧑🏻‍🎓", note: "الطَّالِبُ = isim (orang). يَكْتُبُ = fi'il (tindakan). Satu kalimat dapat memuat keduanya." },
   ],
 };
 
@@ -73,6 +77,7 @@ export default function Page() {
   const [selected, setSelected] = useState("");
   const [completed, setCompleted] = useState<number[]>([]);
   const [scores, setScores] = useState<Record<number, PositionScore>>({});
+  const [lastPosition, setLastPosition] = useState(1);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const activeQuestions = useMemo(() => questions.filter((item) => item.position === position), [position]);
@@ -83,15 +88,6 @@ export default function Page() {
   const totalScore = totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
   const isUnlocked = (id: number) => id === 1 || completed.includes(id - 1);
   const progress = Math.round((completed.length / 7) * 100);
-
-  const speak = (text: string) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "ar-SA";
-    utterance.rate = 0.78;
-    window.speechSynthesis.speak(utterance);
-  };
 
   const startPlayer = async () => {
     if (!nickname.trim()) return;
@@ -144,12 +140,9 @@ export default function Page() {
     const nextCompleted = completed.includes(position) ? completed : [...completed, position];
     setScores(nextScores);
     setCompleted(nextCompleted);
-    if (position === 7) {
-      setScreen("result");
-      void saveResults(nextAnswers);
-    } else {
-      setScreen("map");
-    }
+    setLastPosition(position);
+    setScreen("position-result");
+    if (position === 7) void saveResults(nextAnswers);
   };
 
   const finishMaterial = () => {
@@ -211,12 +204,12 @@ export default function Page() {
     {screen === "learn" && <section className="content-section learning-screen">
       <button className="back-link" onClick={() => setScreen("map")}><ArrowLeft size={16} /> Kembali ke peta</button>
       <div className="learning-heading"><div><span className="eyebrow">POS {String(position).padStart(2, "0")} · TAHAP BELAJAR</span><h2>{positions[position - 1].title}</h2><p>{positions[position - 1].subtitle}</p></div><span className="progress-label">Materi {cardIndex + 1} dari {currentMaterials.length}</span></div>
-      <div className="learning-card adventure-learning-card"><div className="learning-illustration" style={{ backgroundImage: `linear-gradient(180deg, rgba(18,49,88,.02), rgba(18,49,88,.24)), url(${learningScenes[position] || "/images/rumah-keluarga.jpg"})` }}><span>{currentMaterials[cardIndex]?.picture}</span><small>AMATI ILUSTRASI</small></div><div className="word-content"><span className="eyebrow"><BookOpen size={14} /> KARTU MATERI</span><div className="arabic-word" dir="rtl">{currentMaterials[cardIndex]?.arabic}</div><h3>{currentMaterials[cardIndex]?.meaning}</h3><p className="learning-note">{currentMaterials[cardIndex]?.note}</p><button className="audio-button" onClick={() => speak(currentMaterials[cardIndex]?.arabic || "")}><Volume2 size={18} /> Dengarkan pelafalan</button>
+      <div className="learning-card adventure-learning-card"><div className={`learning-illustration scene-position-${position}`} role="img" aria-label={`Ilustrasi ${currentMaterials[cardIndex]?.meaning}`}><div className="scene-sky"><span>☀️</span><span>☁️</span></div><div className="scene-action">{position === 2 && cardIndex === 0 ? <><span className="scene-bed">🛏️</span><span className="scene-person">🧒🏻</span><span className="scene-clock">05.00</span></> : position === 3 ? <><span>🧑🏻‍🎓</span><span>📚</span></> : position === 4 ? <><span>🧒🏻</span><span>{cardIndex % 2 === 0 ? "📖" : "✍️"}</span></> : <><span>{currentMaterials[cardIndex]?.picture}</span><span className="scene-person">🧒🏻</span></>}</div><div className="scene-caption"><b>{currentMaterials[cardIndex]?.meaning}</b><small>{position === 2 && cardIndex === 0 ? "Pagi hari • siswa bangun dari tempat tidur" : "Amati aktivitas dan benda pada ilustrasi"}</small></div></div><div className="word-content"><span className="eyebrow"><BookOpen size={14} /> KARTU MATERI</span><div className="arabic-word" dir="rtl">{currentMaterials[cardIndex]?.arabic}</div><h3>{currentMaterials[cardIndex]?.meaning}</h3><p className="learning-note">{currentMaterials[cardIndex]?.note}</p>
         <div className="word-dots">{currentMaterials.map((_, index) => <span key={index} className={index <= cardIndex ? "active" : ""} />)}</div>
         <button className="primary" onClick={() => { if (cardIndex < currentMaterials.length - 1) setCardIndex(cardIndex + 1); else finishMaterial(); }}>{cardIndex < currentMaterials.length - 1 ? "Materi Berikutnya" : "Mulai Cek Pemahaman"} <ArrowRight size={18} /></button>
       </div></div>
-      {position === 3 && <div className="concept-note"><b>Ingat konsep isim:</b> Isim merupakan kata yang menunjukkan nama orang, benda, tempat, atau sesuatu. Contoh: بَيْتٌ (rumah), كِتَابٌ (buku), dan مَطْبَخٌ (dapur).</div>}
-      {position === 4 && <div className="concept-note"><b>Ingat konsep fi'il:</b> Fi'il merupakan kata yang menunjukkan pekerjaan atau tindakan. Contoh: يَأْكُلُ (makan), يَشْرَبُ (minum), dan يَقْرَأُ (membaca).</div>}
+      {position === 3 && <div className="concept-note"><b>Ingat:</b> Isim menamai orang, benda, tempat, atau sesuatu. Fi'il menunjukkan pekerjaan atau tindakan. Pelajari definisi dan cirinya sebelum mengerjakan soal.</div>}
+      {position === 4 && <div className="concept-note"><b>Bandingkan:</b> كِتَابٌ (buku) adalah isim, sedangkan يَقْرَأُ (membaca) adalah fi'il. Isim menjawab “apa/siapa?”, fi'il menjawab “melakukan apa?”.</div>}
     </section>}
 
     {screen === "quiz" && currentQuestion && <section className="quiz-wrap adventure-quiz-wrap">
@@ -226,11 +219,13 @@ export default function Page() {
         {currentQuestion.type === "picture" && currentQuestion.picture && <div className="question-picture" role="img" aria-label="Ilustrasi petunjuk soal"><span>{currentQuestion.picture}</span></div>}
         <h2>{currentQuestion.prompt}</h2>
         {currentQuestion.type !== "picture" && currentQuestion.picture && <div className="question-picture" role="img" aria-label="Ilustrasi petunjuk soal"><span>{currentQuestion.picture}</span></div>}
-        {currentQuestion.type !== "picture" && currentQuestion.arabic && <div className="arabic-question" dir="rtl">{currentQuestion.arabic}<button aria-label="Dengarkan" onClick={() => speak(currentQuestion.arabic || "")}><Volume2 size={18} /></button></div>}
+        {currentQuestion.type !== "picture" && currentQuestion.arabic && <div className="arabic-question" dir="rtl">{currentQuestion.arabic}</div>}
         <div className="answer-grid">{currentQuestion.options.map((option, index) => <button key={option} className={`answer-option ${selected === option ? "selected" : ""}`} onClick={() => setSelected(option)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}</div>
         <button className="primary full" disabled={!selected} onClick={submitAnswer}>{questionIndex === activeQuestions.length - 1 ? position === 7 ? "Selesaikan Petualangan" : "Selesaikan Pos" : "Jawaban Berikutnya"} <ArrowRight size={18} /></button>
       </div>
     </section>}
+
+    {screen === "position-result" && <section className="result-panel position-result-panel"><div className="trophy">{scores[lastPosition]?.score === scores[lastPosition]?.total ? "🌟" : "📝"}</div><span className="eyebrow">HASIL POS {lastPosition}</span><h2>Hasil latihanmu, {player?.nickname}!</h2><div className="big-score">{scores[lastPosition]?.score || 0}<small>/{scores[lastPosition]?.total || 0}</small></div><span className="muted">Jawaban benar</span><div className="wrong-number-summary">Nomor soal yang perlu dipelajari kembali: {activeQuestions.reduce((numbers, question, index) => { const record = answers.find((item) => item.questionId === question.id); if (!record?.correct) numbers.push(index + 1); return numbers; }, [] as number[]).join(", ") || "Tidak ada, semua jawaban benar!"}</div><div className="review-list">{activeQuestions.map((question, index) => { const record = answers.find((item) => item.questionId === question.id); const correct = record?.correct; return <article className={`review-item ${correct ? "review-correct" : "review-wrong"}`} key={question.id}><div className="review-heading"><b>Soal {index + 1}</b><span>{correct ? "✓ Benar" : "✕ Salah"}</span></div><p>{question.prompt}</p>{question.arabic && <div className="review-arabic" dir="rtl">{question.arabic}</div>}<div className="review-answer"><small>Jawaban siswa</small><b>{record?.answer || "Tidak dijawab"}</b></div><div className="review-answer"><small>Jawaban yang tepat</small><b>{question.answer}</b></div><p className="review-explanation">{question.explanation}</p></article>; })}</div><div className="hero-actions centered"><button className="primary" onClick={() => setScreen(lastPosition === 7 ? "result" : "map")}>{lastPosition === 7 ? "Lihat Rekap Akhir" : "Lanjutkan Petualangan"} <ArrowRight size={17}/></button></div></section>}
 
     {screen === "result" && <section className="result-panel adventure-result-panel"><div className="trophy"><Trophy size={54} /></div><span className="eyebrow"><Medal size={15} /> PETUALANGAN SELESAI</span><h2>Selamat, Detektif {player?.nickname}!</h2><p>Kamu telah menuntaskan tujuh pos petualangan bahasa Arab. Berikut rekap pencapaianmu.</p>
       <div className="big-score">{totalScore}<small>/100</small></div><span className="muted">Nilai keseluruhan</span>
@@ -240,7 +235,7 @@ export default function Page() {
       <div className="hero-actions centered"><button className="primary" onClick={() => setScreen("map")}>Lihat Peta Petualangan</button><button className="secondary" onClick={resetAdventure}><RotateCcw size={16} /> Ulangi Petualangan</button></div>
     </section>}
 
-    {screen !== "map" && screen !== "learn" && screen !== "quiz" && screen !== "result" && <section id="cara-bermain" className="how-section"><span className="eyebrow">BELAJAR SAMBIL BERMAIN</span><h2>Bagaimana cara bermain?</h2><div className="how-grid"><div><span>01</span><b>Masuk sebagai detektif</b><p>Isi nama dan kode kelas untuk memulai petualangan.</p></div><div><span>02</span><b>Ikuti tujuh pos</b><p>Selesaikan pos secara berurutan. Pos berikutnya terbuka setelah pos sebelumnya selesai.</p></div><div><span>03</span><b>Pelajari dan jawab</b><p>Amati kartu materi, dengarkan pelafalan, lalu kerjakan tantangan.</p></div><div><span>04</span><b>Lihat pencapaian</b><p>Periksa nilai setiap pos dan nilai keseluruhan setelah tantangan final.</p></div></div></section>}
+    {screen !== "map" && screen !== "learn" && screen !== "quiz" && screen !== "position-result" && screen !== "result" && <section id="cara-bermain" className="how-section"><span className="eyebrow">BELAJAR SAMBIL BERMAIN</span><h2>Bagaimana cara bermain?</h2><div className="how-grid"><div><span>01</span><b>Masuk sebagai detektif</b><p>Isi nama dan kode kelas untuk memulai petualangan.</p></div><div><span>02</span><b>Ikuti tujuh pos</b><p>Selesaikan pos secara berurutan. Pos berikutnya terbuka setelah pos sebelumnya selesai.</p></div><div><span>03</span><b>Pelajari dan jawab</b><p>Amati ilustrasi, pelajari materi, lalu kerjakan tantangan.</p></div><div><span>04</span><b>Lihat pencapaian</b><p>Periksa nilai setiap pos dan nilai keseluruhan setelah tantangan final.</p></div></div></section>}
     <footer><b>Detektif Arab</b><span>مُغَامَرَةُ اللُّغَةِ الْعَرَبِيَّةِ</span><small>Media pembelajaran bahasa Arab • Kelas VII</small></footer>
   </main>;
 }
