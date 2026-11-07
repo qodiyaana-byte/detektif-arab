@@ -1,90 +1,130 @@
-export type QuestionType = "picture" | "meaning" | "isim" | "fiil" | "context";
 export type Question = {
   id: string;
-  position: 1 | 2 | 3 | 4 | 5 | 6 | 7;
-  category: "mufradat" | "isim" | "fiil" | "konteks";
-  type: QuestionType;
+  position: 1 | 2 | 3 | 4 | 5;
+  category: "isim" | "fiil" | "beda" | "campuran";
   prompt: string;
-  picture?: string;
   arabic?: string;
   options: string[];
   answer: string;
-  explanation: string;
+  reason: string;
 };
 
 const q = (
-  id: string, position: Question["position"], category: Question["category"], type: QuestionType,
-  prompt: string, options: string[], answer: string, explanation: string,
-  arabic?: string, picture?: string
-): Question => ({ id, position, category, type, prompt, options, answer, explanation, arabic, picture });
+  id: string, position: Question["position"], category: Question["category"],
+  prompt: string, options: string[], answer: string, reason: string, arabic?: string
+): Question => ({ id, position, category, prompt, options, answer, reason, arabic });
 
-export const questions: Question[] = [
-  // POS 1: cek pemahaman kosakata dasar (3 soal)
-  q("p1-01",1,"mufradat","picture","Amati gambar berikut, lalu pilih kosakata yang sesuai.",["بَيْتٌ","مَاءٌ","كِتَابٌ"],"بَيْتٌ","بَيْتٌ berarti rumah.","بَيْتٌ","🏠"),
-  q("p1-02",1,"mufradat","meaning","Apa arti مَاءٌ?",["Air","Makanan","Kamar"],"Air","مَاءٌ berarti air.","مَاءٌ"),
-  q("p1-03",1,"mufradat","picture","Amati gambar berikut, lalu pilih kosakata yang sesuai.",["يَقْرَأُ","يَنَامُ","يَأْكُلُ"],"يَقْرَأُ","يَقْرَأُ berarti membaca.","يَقْرَأُ","📖"),
+const rawQuestions: Question[] = [
+  // POS 1: Isim (5 soal)
+  q("p1-01", 1, "isim", "Manakah pengertian isim yang tepat?",
+    ["Kata yang menunjukkan nama orang, benda, atau tempat dan tidak terikat waktu", "Kata yang menunjukkan pekerjaan dan terikat waktu", "Kata yang hanya digunakan untuk memanggil"],
+    "Kata yang menunjukkan nama orang, benda, atau tempat dan tidak terikat waktu",
+    "Isim menunjukkan nama (orang, benda, tempat, sifat) dengan makna yang berdiri sendiri, tanpa terikat waktu. Kata yang menunjukkan pekerjaan dan terikat waktu adalah fi'il."),
+  q("p1-02", 1, "isim", "Manakah kata yang termasuk isim?",
+    ["يَكْتُبُ", "كِتَابٌ", "قَدْ"], "كِتَابٌ",
+    "كِتَابٌ (buku) bertanwin dan menunjukkan nama benda, sehingga termasuk isim. يَكْتُبُ adalah fi'il, sedangkan قَدْ adalah huruf.", "كِتَابٌ — يَكْتُبُ — قَدْ"),
+  q("p1-03", 1, "isim", "Apa arti kata مَدْرَسَةٌ?",
+    ["Sekolah", "Pasar", "Masjid"], "Sekolah",
+    "مَدْرَسَةٌ berarti sekolah. Kata ini merupakan isim karena menunjukkan nama tempat dan bertanwin.", "مَدْرَسَةٌ"),
+  q("p1-04", 1, "isim", "Kata manakah yang termasuk isim karena dimasuki alif lam (ال)?",
+    ["الْقَلَمُ", "يَقْرَأُ", "سَيَذْهَبُ"], "الْقَلَمُ",
+    "الْقَلَمُ (pena itu) diawali ال, yaitu salah satu ciri isim. يَقْرَأُ dan سَيَذْهَبُ adalah fi'il."),
+  q("p1-05", 1, "isim", "Pada ungkapan فِي الْبَيْتِ, kata الْبَيْتِ termasuk isim karena ...",
+    ["Didahului huruf jar فِي dan dimasuki ال", "Didahului قَدْ", "Bertemu ta' fa'il (تُ)"], "Didahului huruf jar فِي dan dimasuki ال",
+    "الْبَيْتِ didahului huruf jar فِي dan memiliki ال; keduanya ciri isim. قَدْ dan ta' fa'il adalah tanda fi'il.", "فِي الْبَيْتِ"),
 
-  // POS 2: cek pemahaman kosakata dalam frasa (3 soal)
-  q("p2-01",2,"mufradat","context","Apa arti أَغْسِلُ يَدِي?",["Saya mencuci tangan","Saya membaca buku","Saya tidur"],"Saya mencuci tangan","أَغْسِلُ berarti saya mencuci dan يَدِي berarti tanganku.","أَغْسِلُ يَدِي"),
-  q("p2-02",2,"mufradat","context","Lengkapi: أَشْرَبُ ... (Saya minum air).",["الْمَاءَ","الْكِتَابَ","الْبَابَ"],"الْمَاءَ","الْمَاءَ berarti air.","أَشْرَبُ الْمَاءَ"),
-  q("p2-03",2,"mufradat","picture","Amati gambar berikut, lalu pilih ungkapan yang sesuai.",["أَنَا أَطْبُخُ","أَنَا أَنَامُ","أَنَا أَقْرَأُ"],"أَنَا أَطْبُخُ","أَطْبُخُ berarti saya memasak.","أَنَا أَطْبُخُ","🍳"),
-  // POS 3: materi dasar isim dan fi'il secara eksplisit
-  q("p3-01",3,"isim","isim","Apa definisi isim dalam bahasa Arab?",["Kata yang menunjukkan nama orang, benda, tempat, atau sesuatu","Kata yang menunjukkan pekerjaan atau tindakan","Kata penghubung yang tidak memiliki makna sendiri"],"Kata yang menunjukkan nama orang, benda, tempat, atau sesuatu","Isim digunakan untuk menamai orang, benda, tempat, hewan, atau sesuatu.","الطَّالِبُ، كِتَابٌ، مَدْرَسَةٌ"),
-  q("p3-02",3,"isim","isim","Manakah ciri isim yang tepat?",["Dapat menerima ال (alif lam) atau tanwin pada banyak bentuknya","Selalu diawali يـ atau تـ","Selalu menunjukkan kegiatan"],"Dapat menerima ال (alif lam) atau tanwin pada banyak bentuknya","Contoh: كِتَابٌ menjadi الْكِتَابُ. Tanwin dan ال merupakan ciri yang sering ditemukan pada isim.","كِتَابٌ ← الْكِتَابُ"),
-  q("p3-03",3,"isim","context","Pilih kalimat yang memuat isim كِتَابٌ (buku).",["هَذَا كِتَابٌ","هَذَا يَكْتُبُ","هَذَا يَقْرَأُ"],"هَذَا كِتَابٌ","هَذَا كِتَابٌ berarti ini buku. كِتَابٌ menamai benda sehingga termasuk isim.","هَذَا كِتَابٌ","📘"),
-  q("p3-04",3,"isim","isim","Manakah contoh isim yang menunjukkan nama tempat?",["مَدْرَسَةٌ","يَكْتُبُ","يَذْهَبُ"],"مَدْرَسَةٌ","مَدْرَسَةٌ berarti sekolah, nama sebuah tempat.","مَدْرَسَةٌ"),
-  q("p3-05",3,"fiil","fiil","Apa definisi fi'il?",["Kata yang menunjukkan pekerjaan atau tindakan","Kata yang menamai benda atau tempat","Kata yang menghubungkan dua kata"],"Kata yang menunjukkan pekerjaan atau tindakan","Fi'il menyatakan kegiatan atau tindakan, misalnya membaca dan menulis.","يَقْرَأُ، يَكْتُبُ"),
-  q("p3-06",3,"fiil","fiil","Manakah ciri umum fi'il mudhari' (kegiatan yang sedang/akan dilakukan)?",["Sering diawali salah satu huruf أ، ن، ي، ت","Selalu diakhiri tanwin","Selalu diawali ال"],"Sering diawali salah satu huruf أ، ن، ي، ت","Fi'il mudhari' sering diawali huruf أ، ن، ي، atau ت, seperti يَكْتُبُ dan تَقْرَأُ.","يَكْتُبُ"),
-  q("p3-07",3,"fiil","picture","Pada kalimat berikut, kata yang menunjukkan tindakan adalah fi'il. Pilih jenis kata yang tepat.",["Fi'il","Isim","Huruf"],"Fi'il","يَكْتُبُ berarti sedang/akan menulis. Kata yang menunjukkan tindakan termasuk fi'il.","الطَّالِبُ يَكْتُبُ"),
-  q("p3-08",3,"isim","isim","Pasangan yang seluruhnya merupakan isim adalah ...",["طَالِبٌ dan قَلَمٌ","يَكْتُبُ dan يَقْرَأُ","يَذْهَبُ dan مَدْرَسَةٌ"],"طَالِبٌ dan قَلَمٌ","طَالِبٌ (siswa) dan قَلَمٌ (pena) sama-sama menamai sesuatu.","طَالِبٌ · قَلَمٌ"),
-  q("p3-09",3,"fiil","fiil","Manakah contoh fi'il yang berarti membaca?",["يَقْرَأُ","كِتَابٌ","مَكْتَبَةٌ"],"يَقْرَأُ","يَقْرَأُ berarti membaca dan menunjukkan tindakan.","يَقْرَأُ"),
-  q("p3-10",3,"konteks","context","Dalam kalimat الطَّالِبُ يَقْرَأُ الْكِتَابَ, manakah kata yang termasuk isim?",["الطَّالِبُ dan الْكِتَابَ","يَقْرَأُ saja","Tidak ada isim"],"الطَّالِبُ dan الْكِتَابَ","الطَّالِبُ (siswa) dan الْكِتَابَ (buku) adalah isim. يَقْرَأُ adalah fi'il.","الطَّالِبُ يَقْرَأُ الْكِتَابَ"),
+  // POS 2: Fi'il (5 soal)
+  q("p2-01", 2, "fiil", "Manakah pengertian fi'il yang tepat?",
+    ["Kata yang menunjukkan pekerjaan atau kejadian dan terikat waktu", "Kata yang menunjukkan nama benda dan tidak terikat waktu", "Kata yang selalu diawali alif lam"],
+    "Kata yang menunjukkan pekerjaan atau kejadian dan terikat waktu",
+    "Fi'il menunjukkan pekerjaan atau kejadian yang berkaitan dengan waktu (lampau, sekarang/akan datang, atau perintah)."),
+  q("p2-02", 2, "fiil", "Manakah kata yang termasuk fi'il?",
+    ["مَاءٌ", "يَشْرَبُ", "الْبَيْتُ"], "يَشْرَبُ",
+    "يَشْرَبُ berarti minum, yaitu pekerjaan. مَاءٌ (air) dan الْبَيْتُ (rumah itu) adalah isim.", "مَاءٌ — يَشْرَبُ — الْبَيْتُ"),
+  q("p2-03", 2, "fiil", "Apa arti kata كَتَبَ?",
+    ["Telah menulis", "Telah membaca", "Telah makan"], "Telah menulis",
+    "كَتَبَ adalah fi'il madhi (lampau) yang berarti telah menulis. Telah membaca adalah قَرَأَ, telah makan adalah أَكَلَ.", "كَتَبَ"),
+  q("p2-04", 2, "fiil", "Pada kata كَتَبَتْ, tanda fi'il yang tampak adalah ...",
+    ["Ta' ta'nits sakinah (تْ)", "Alif lam (ال)", "Tanwin"], "Ta' ta'nits sakinah (تْ)",
+    "Akhiran تْ pada كَتَبَتْ adalah ta' ta'nits sakinah, tanda fi'il. Alif lam dan tanwin adalah ciri isim.", "كَتَبَتْ"),
+  q("p2-05", 2, "fiil", "Manakah fi'il yang berarti \"akan membaca\"?",
+    ["سَيَقْرَأُ", "قَرَأَ", "الْقِرَاءَةُ"], "سَيَقْرَأُ",
+    "Awalan سَ menunjukkan waktu yang akan datang, sehingga سَيَقْرَأُ berarti akan membaca. قَرَأَ berarti telah membaca (lampau), dan الْقِرَاءَةُ adalah isim (bacaan).", "سَيَقْرَأُ — قَرَأَ — الْقِرَاءَةُ"),
 
-  // POS 4: membandingkan isim dan fi'il
-  q("p4-01",4,"isim","context","Apa perbedaan utama isim dan fi'il?",["Isim menamai sesuatu, sedangkan fi'il menunjukkan tindakan","Isim menunjukkan tindakan, sedangkan fi'il menamai benda","Keduanya selalu berarti benda"],"Isim menamai sesuatu, sedangkan fi'il menunjukkan tindakan","Contoh: بَابٌ (pintu) adalah isim, sedangkan يَفْتَحُ (membuka) adalah fi'il.","بَابٌ يَفْتَحُ"),
-  q("p4-02",4,"isim","picture","Lihat ilustrasi anak yang sedang membaca buku. Kata كِتَابٌ (buku) termasuk ...",["Isim","Fi'il","Huruf"],"Isim","كِتَابٌ menamai benda yang dibaca, sehingga termasuk isim.","كِتَابٌ"),
-  q("p4-03",4,"fiil","picture","Lihat ilustrasi anak yang sedang membaca buku. Kata يَقْرَأُ (membaca) termasuk ...",["Fi'il","Isim","Huruf"],"Fi'il","يَقْرَأُ menunjukkan tindakan membaca, sehingga termasuk fi'il.","يَقْرَأُ"),
-  q("p4-04",4,"isim","isim","Manakah pasangan isim dan fi'il yang benar?",["قَلَمٌ (pena) = isim; يَكْتُبُ (menulis) = fi'il","يَكْتُبُ = isim; قَلَمٌ = fi'il","Keduanya fi'il"],"قَلَمٌ (pena) = isim; يَكْتُبُ (menulis) = fi'il","قَلَمٌ adalah nama benda, sedangkan يَكْتُبُ adalah tindakan menulis.","قَلَمٌ · يَكْتُبُ"),
-  q("p4-05",4,"isim","context","Dalam kalimat الْوَلَدُ يَلْعَبُ, kata الْوَلَدُ termasuk ...",["Isim","Fi'il","Huruf"],"Isim","الْوَلَدُ berarti anak laki-laki dan menamai orang.","الْوَلَدُ يَلْعَبُ"),
-  q("p4-06",4,"fiil","context","Dalam kalimat الْوَلَدُ يَلْعَبُ, kata يَلْعَبُ termasuk ...",["Fi'il","Isim","Huruf"],"Fi'il","يَلْعَبُ berarti bermain dan menunjukkan tindakan.","الْوَلَدُ يَلْعَبُ"),
-  q("p4-07",4,"isim","isim","Manakah kata yang dapat menerima ال dan tetap menjadi isim?",["بَيْتٌ menjadi الْبَيْتُ","يَأْكُلُ menjadi الْيَأْكُلُ","يَشْرَبُ menjadi الْيَشْرَبُ"],"بَيْتٌ menjadi الْبَيْتُ","الْبَيْتُ adalah bentuk isim dengan ال.","بَيْتٌ ← الْبَيْتُ"),
-  q("p4-08",4,"fiil","fiil","Kata يَشْرَبُ termasuk fi'il karena ...",["Menunjukkan tindakan minum","Menamai benda air","Menamai tempat"],"Menunjukkan tindakan minum","يَشْرَبُ berarti minum, yaitu sebuah tindakan.","يَشْرَبُ"),
-  q("p4-09",4,"konteks","context","Pilih analisis yang tepat untuk kalimat أَحْمَدُ يَفْتَحُ الْبَابَ.",["أَحْمَدُ dan الْبَابَ = isim; يَفْتَحُ = fi'il","Semua kata adalah isim","Semua kata adalah fi'il"],"أَحْمَدُ dan الْبَابَ = isim; يَفْتَحُ = fi'il","أَحْمَدُ adalah nama orang, الْبَابَ adalah benda, dan يَفْتَحُ menunjukkan tindakan membuka.","أَحْمَدُ يَفْتَحُ الْبَابَ"),
-  q("p4-10",4,"context","context","Kalimat yang memuat isim dan fi'il sekaligus adalah ...",["الْبِنْتُ تَقْرَأُ الْكِتَابَ","كِتَابٌ وَقَلَمٌ","يَقْرَأُ وَيَكْتُبُ"],"الْبِنْتُ تَقْرَأُ الْكِتَابَ","الْبِنْتُ dan الْكِتَابَ adalah isim, sedangkan تَقْرَأُ adalah fi'il.","الْبِنْتُ تَقْرَأُ الْكِتَابَ"),
+  // POS 3: Perbedaan isim dan fi'il (7 soal)
+  q("p3-01", 3, "beda", "Apa perbedaan utama isim dan fi'il?",
+    ["Isim tidak terikat waktu, fi'il terikat waktu", "Isim terikat waktu, fi'il tidak terikat waktu", "Isim dan fi'il sama-sama tidak terikat waktu"],
+    "Isim tidak terikat waktu, fi'il terikat waktu",
+    "Fi'il selalu menunjukkan waktu (lampau, sekarang/akan datang, perintah), sedangkan isim hanya menunjukkan nama atau sifat tanpa waktu."),
+  q("p3-02", 3, "beda", "Kata berikut yang dapat bertanwin adalah ...",
+    ["كِتَابٌ", "يَكْتُبُ", "ذَهَبَ"], "كِتَابٌ",
+    "Tanwin adalah ciri isim. كِتَابٌ adalah isim, sedangkan يَكْتُبُ dan ذَهَبَ adalah fi'il yang tidak menerima tanwin.", "كِتَابٌ — يَكْتُبُ — ذَهَبَ"),
+  q("p3-03", 3, "beda", "Kata قَرَأَ termasuk ...",
+    ["Isim", "Fi'il", "Huruf"], "Fi'il",
+    "قَرَأَ berarti telah membaca (pekerjaan di masa lampau) dan dapat bertemu ta' ta'nits sakinah menjadi قَرَأَتْ. Jadi termasuk fi'il.", "قَرَأَ"),
+  q("p3-04", 3, "beda", "Kata الْمَدْرَسَةُ termasuk ...",
+    ["Isim karena dimasuki ال", "Fi'il karena menunjukkan pekerjaan", "Fi'il karena berharakat dhammah"], "Isim karena dimasuki ال",
+    "الْمَدْرَسَةُ (sekolah itu) menunjukkan nama tempat dan diawali ال. Alif lam adalah ciri isim.", "الْمَدْرَسَةُ"),
+  q("p3-05", 3, "beda", "Manakah pasangan kata dan jenisnya yang benar?",
+    ["قَلَمٌ = isim, يَجْلِسُ = fi'il", "قَلَمٌ = fi'il, يَجْلِسُ = isim", "قَلَمٌ = fi'il, يَجْلِسُ = fi'il"], "قَلَمٌ = isim, يَجْلِسُ = fi'il",
+    "قَلَمٌ (pena) adalah nama benda sehingga isim. يَجْلِسُ (duduk) adalah pekerjaan sehingga fi'il."),
+  q("p3-06", 3, "beda", "Tanda yang hanya dimiliki oleh fi'il adalah ...",
+    ["Dimasuki alif lam", "Bertanwin", "Didahului قَدْ atau سَوْفَ"], "Didahului قَدْ atau سَوْفَ",
+    "قَدْ dan سَوْفَ (juga سَ) hanya dapat mendahului fi'il. Alif lam dan tanwin adalah ciri isim."),
+  q("p3-07", 3, "beda", "Pada kalimat سَيَذْهَبُ الطَّالِبُ إِلَى الْمَدْرَسَةِ, kata yang termasuk fi'il adalah ...",
+    ["سَيَذْهَبُ", "الطَّالِبُ", "الْمَدْرَسَةِ"], "سَيَذْهَبُ",
+    "سَيَذْهَبُ diawali سَ (tanda fi'il) dan berarti akan pergi. الطَّالِبُ dan الْمَدْرَسَةِ diawali ال sehingga isim.", "سَيَذْهَبُ الطَّالِبُ إِلَى الْمَدْرَسَةِ"),
 
-  // POS 5: campuran dasar
-  q("p5-01",5,"mufradat","picture","Amati gambar berikut, lalu pilih kosakata yang sesuai.",["سَرِيرٌ","كُرْسِيٌّ","بَابٌ"],"سَرِيرٌ","سَرِيرٌ berarti tempat tidur.","سَرِيرٌ","🛏️"),
-  q("p5-02",5,"isim","isim","Pilih kata yang termasuk isim.",["يَغْسِلُ","مِنْشَفَةٌ","يَطْبُخُ"],"مِنْشَفَةٌ","مِنْشَفَةٌ berarti handuk dan termasuk isim.","مِنْشَفَةٌ"),
-  q("p5-03",5,"fiil","picture","Amati gambar berikut, lalu pilih kata yang sesuai.",["يَطْبُخُ","مَطْبَخٌ","طَعَامٌ"],"يَطْبُخُ","يَطْبُخُ berarti memasak.","يَطْبُخُ","👩‍🍳"),
-  q("p5-04",5,"mufradat","meaning","Apa arti بَابٌ?",["Pintu","Jendela","Lantai"],"Pintu","بَابٌ berarti pintu.","بَابٌ"),
-  q("p5-05",5,"isim","isim","Kata نَافِذَةٌ termasuk ...",["Isim","Fi'il","Huruf"],"Isim","نَافِذَةٌ berarti jendela.","نَافِذَةٌ"),
-  q("p5-06",5,"fiil","fiil","Manakah fi'il yang berarti bermain?",["يَلْعَبُ","لُعْبَةٌ","غُرْفَةٌ"],"يَلْعَبُ","يَلْعَبُ berarti bermain.","يَلْعَبُ"),
-  q("p5-07",5,"mufradat","picture","Amati gambar berikut, lalu pilih kosakata yang sesuai.",["مَاءٌ","طَعَامٌ","كِتَابٌ"],"مَاءٌ","مَاءٌ berarti air.","مَاءٌ","💧"),
-  q("p5-08",5,"fiil","context","Apa arti kalimat أَنَا أَقْرَأُ الْكِتَابَ?",["Saya membaca buku","Saya menulis buku","Saya membeli buku"],"Saya membaca buku","أَقْرَأُ berarti membaca.","أَنَا أَقْرَأُ الْكِتَابَ"),
-  q("p5-09",5,"isim","isim","Manakah kelompok kata benda seluruhnya?",["بَيْتٌ، مَاءٌ، كِتَابٌ","يَأْكُلُ، يَشْرَبُ، يَنَامُ","يَقْرَأُ، بَابٌ، يَلْعَبُ"],"بَيْتٌ، مَاءٌ، كِتَابٌ","Ketiganya menamai benda.","بَيْتٌ · مَاءٌ · كِتَابٌ"),
-  q("p5-10",5,"fiil","fiil","Kata yang menunjukkan kegiatan membersihkan adalah ...",["يُنَظِّفُ","مِكْنَسَةٌ","غُرْفَةٌ"],"يُنَظِّفُ","يُنَظِّفُ berarti membersihkan.","يُنَظِّفُ"),
+  // POS 4: Evaluasi keseluruhan (6 soal)
+  q("p4-01", 4, "campuran", "Apa arti kata يَقْرَأُ dan termasuk jenis kata apa?",
+    ["Membaca — fi'il", "Buku — isim", "Membaca — isim"], "Membaca — fi'il",
+    "يَقْرَأُ berarti membaca dan menunjukkan pekerjaan, sehingga fi'il. Kata untuk buku adalah كِتَابٌ (isim).", "يَقْرَأُ"),
+  q("p4-02", 4, "campuran", "Manakah isim yang berarti air?",
+    ["مَاءٌ", "يَشْرَبُ", "شَرِبَ"], "مَاءٌ",
+    "مَاءٌ berarti air dan merupakan isim. يَشْرَبُ dan شَرِبَ (minum) adalah fi'il.", "مَاءٌ — يَشْرَبُ — شَرِبَ"),
+  q("p4-03", 4, "campuran", "Kata ذَهَبَ termasuk fi'il karena dapat ditambah ...",
+    ["تْ menjadi ذَهَبَتْ", "ال menjadi الذَّهَبُ", "Tanwin"], "تْ menjadi ذَهَبَتْ",
+    "ذَهَبَ dapat bertemu ta' ta'nits sakinah menjadi ذَهَبَتْ, tanda fi'il. Alif lam dan tanwin adalah ciri isim.", "ذَهَبَ"),
+  q("p4-04", 4, "campuran", "Pada ungkapan فِي الْبَيْتِ, kata yang termasuk isim adalah ...",
+    ["الْبَيْتِ", "فِي", "قَدْ"], "الْبَيْتِ",
+    "الْبَيْتِ (rumah itu) adalah isim. فِي adalah huruf jar, bukan isim maupun fi'il.", "فِي الْبَيْتِ"),
+  q("p4-05", 4, "campuran", "Pernyataan yang benar tentang fi'il adalah ...",
+    ["Fi'il menunjukkan pekerjaan dan waktu terjadinya", "Fi'il selalu bertanwin", "Fi'il tidak pernah terikat waktu"], "Fi'il menunjukkan pekerjaan dan waktu terjadinya",
+    "Fi'il adalah kata yang menunjukkan pekerjaan atau kejadian beserta waktunya. Fi'il tidak bertanwin dan selalu terikat waktu."),
+  q("p4-06", 4, "campuran", "Pada kalimat يَكْتُبُ الطَّالِبُ الدَّرْسَ (Siswa menulis pelajaran), ada berapa isim?",
+    ["1", "2", "3"], "2",
+    "الطَّالِبُ dan الدَّرْسَ adalah isim karena diawali ال, jadi ada 2 isim. يَكْتُبُ adalah satu-satunya fi'il.", "يَكْتُبُ الطَّالِبُ الدَّرْسَ"),
 
-  // POS 6: aplikasi dalam konteks
-  q("p6-01",6,"konteks","context","Pilih kalimat yang berarti 'Ibu memasak di dapur'.",["أُمِّي تَطْبُخُ فِي الْمَطْبَخِ","أَبِي يَنَامُ فِي الْغُرْفَةِ","أَخِي يَقْرَأُ الْكِتَابَ"],"أُمِّي تَطْبُخُ فِي الْمَطْبَخِ","تَطْبُخُ berarti memasak dan الْمَطْبَخِ berarti dapur.","أُمِّي تَطْبُخُ فِي الْمَطْبَخِ"),
-  q("p6-02",6,"isim","isim","Dalam kalimat أَبِي يَقْرَأُ كِتَابًا, kata yang merupakan isim adalah ...",["أَبِي dan كِتَابًا","يَقْرَأُ saja","Tidak ada"],"أَبِي dan كِتَابًا","أَبِي (ayahku) dan كِتَابًا (buku) merupakan isim.","أَبِي يَقْرَأُ كِتَابًا"),
-  q("p6-03",6,"fiil","fiil","Fi'il pada kalimat أُخْتِي تَغْسِلُ الصُّحُونَ adalah ...",["أُخْتِي","تَغْسِلُ","الصُّحُونَ"],"تَغْسِلُ","تَغْسِلُ berarti mencuci.","أُخْتِي تَغْسِلُ الصُّحُونَ"),
-  q("p6-04",6,"konteks","picture","Amati gambar berikut, lalu pilih kalimat yang sesuai.",["الْوَلَدُ يُرَتِّبُ الْغُرْفَةَ","الْوَلَدُ يَشْرَبُ الْمَاءَ","الْوَلَدُ يَنَامُ"],"الْوَلَدُ يُرَتِّبُ الْغُرْفَةَ","يُرَتِّبُ berarti merapikan dan الْغُرْفَةَ berarti kamar.","الْوَلَدُ يُرَتِّبُ الْغُرْفَةَ","🧹"),
-  q("p6-05",6,"isim","meaning","Apa arti الْمَطْبَخُ?",["Dapur","Kamar mandi","Ruang tamu"],"Dapur","الْمَطْبَخُ berarti dapur.","الْمَطْبَخُ"),
-  q("p6-06",6,"fiil","meaning","Kata يَسْتَيْقِظُ berarti ...",["Bangun tidur","Pergi tidur","Mencuci"],"Bangun tidur","يَسْتَيْقِظُ berarti bangun tidur.","يَسْتَيْقِظُ"),
-  q("p6-07",6,"konteks","context","Lengkapi: أَنَا ... الْمَاءَ (Saya minum air).",["أَشْرَبُ","أَكْتُبُ","أَنَامُ"],"أَشْرَبُ","أَشْرَبُ berarti saya minum.","أَنَا أَشْرَبُ الْمَاءَ"),
-  q("p6-08",6,"isim","isim","Kata الْحَمَّامُ dalam kalimat أَذْهَبُ إِلَى الْحَمَّامِ adalah ...",["Isim","Fi'il","Kata sambung"],"Isim","الْحَمَّامُ menamai tempat, yaitu kamar mandi.","الْحَمَّامُ"),
-  q("p6-09",6,"fiil","fiil","Pilih dua fi'il berikut.",["يَفْتَحُ dan يُغْلِقُ","بَابٌ dan نَافِذَةٌ","مَاءٌ dan طَعَامٌ"],"يَفْتَحُ dan يُغْلِقُ","Keduanya menunjukkan tindakan membuka dan menutup.","يَفْتَحُ · يُغْلِقُ"),
-  q("p6-10",6,"konteks","context","Makna kalimat أَبِي يَغْسِلُ السَّيَّارَةَ adalah ...",["Ayahku mencuci mobil","Ayahku membaca buku","Ayahku memasak makanan"],"Ayahku mencuci mobil","يَغْسِلُ berarti mencuci.","أَبِي يَغْسِلُ السَّيَّارَةَ"),
-
-  // POS 7: evaluasi akhir integratif
-  q("p7-01",7,"mufradat","picture","Amati gambar berikut, lalu pilih kosakata yang sesuai.",["خِزَانَةٌ","مِكْنَسَةٌ","كُرْسِيٌّ"],"خِزَانَةٌ","خِزَانَةٌ berarti lemari.","خِزَانَةٌ","🗄️"),
-  q("p7-02",7,"isim","isim","Manakah isim dalam kalimat الْبِنْتُ تَكْنُسُ الْبَيْتَ?",["الْبِنْتُ dan الْبَيْتَ","تَكْنُسُ saja","Semua fi'il"],"الْبِنْتُ dan الْبَيْتَ","الْبِنْتُ (anak perempuan) dan الْبَيْتَ (rumah) adalah isim.","الْبِنْتُ تَكْنُسُ الْبَيْتَ"),
-  q("p7-03",7,"fiil","fiil","Fi'il yang berarti menyapu adalah ...",["تَكْنُسُ","مِكْنَسَةٌ","بَيْتٌ"],"تَكْنُسُ","تَكْنُسُ berarti menyapu.","تَكْنُسُ"),
-  q("p7-04",7,"konteks","context","Kalimat yang berarti 'Saya tidur di kamar' adalah ...",["أَنَا أَنَامُ فِي الْغُرْفَةِ","أَنَا أَشْرَبُ الْمَاءَ","أَنَا أَطْبُخُ الطَّعَامَ"],"أَنَا أَنَامُ فِي الْغُرْفَةِ","أَنَامُ berarti saya tidur dan الْغُرْفَةِ berarti kamar.","أَنَا أَنَامُ فِي الْغُرْفَةِ"),
-  q("p7-05",7,"mufradat","meaning","Apa arti مِكْنَسَةٌ?",["Sapu","Piring","Lemari"],"Sapu","مِكْنَسَةٌ berarti sapu.","مِكْنَسَةٌ"),
-  q("p7-06",7,"fiil","picture","Amati gambar berikut, lalu pilih kata yang sesuai.",["يَفْتَحُ","يُغْلِقُ","يَنَامُ"],"يَفْتَحُ","يَفْتَحُ berarti membuka.","يَفْتَحُ","🚪"),
-  q("p7-07",7,"isim","isim","Kelompok isim yang tepat adalah ...",["طَعَامٌ، مَاءٌ، مَائِدَةٌ","يَأْكُلُ، يَشْرَبُ، يَنَامُ","يَفْتَحُ، بَابٌ، يَغْسِلُ"],"طَعَامٌ، مَاءٌ، مَائِدَةٌ","Ketiganya menamai makanan, air, dan meja makan.","طَعَامٌ · مَاءٌ · مَائِدَةٌ"),
-  q("p7-08",7,"konteks","context","Arti أُمِّي تَغْسِلُ الْمَلَابِسَ adalah ...",["Ibuku mencuci pakaian","Ibuku membaca buku","Ibuku tidur di kamar"],"Ibuku mencuci pakaian","تَغْسِلُ berarti mencuci dan الْمَلَابِسَ berarti pakaian.","أُمِّي تَغْسِلُ الْمَلَابِسَ"),
-  q("p7-09",7,"fiil","fiil","Manakah pasangan fi'il dan artinya yang benar?",["يَكْنُسُ = menyapu","بَيْتٌ = tidur","مَاءٌ = minum"],"يَكْنُسُ = menyapu","يَكْنُسُ merupakan fi'il yang berarti menyapu.","يَكْنُسُ"),
-  q("p7-10",7,"konteks","context","Pilih kalimat yang memuat isim dan fi'il sekaligus.",["الْوَلَدُ يَلْعَبُ فِي الْبَيْتِ","بَيْتٌ وَكِتَابٌ","مَاءٌ وَطَعَامٌ"],"الْوَلَدُ يَلْعَبُ فِي الْبَيْتِ","الْوَلَدُ dan الْبَيْتِ adalah isim, sedangkan يَلْعَبُ adalah fi'il.","الْوَلَدُ يَلْعَبُ فِي الْبَيْتِ"),
+  // POS 5: Soal akhir, satu tingkat lebih sulit (7 soal)
+  q("p5-01", 5, "campuran", "Pada kalimat كَتَبَ الْوَلَدُ رِسَالَةً (Anak itu telah menulis surat), ada berapa isim dan fi'il?",
+    ["2 isim dan 1 fi'il", "1 isim dan 2 fi'il", "3 isim dan 0 fi'il"], "2 isim dan 1 fi'il",
+    "كَتَبَ adalah fi'il. الْوَلَدُ (diawali ال) dan رِسَالَةً (bertanwin) adalah isim. Jadi ada 2 isim dan 1 fi'il.", "كَتَبَ الْوَلَدُ رِسَالَةً"),
+  q("p5-02", 5, "campuran", "Pada kalimat سَوْفَ يَذْهَبُ أَبِي إِلَى السُّوقِ, manakah yang termasuk fi'il?",
+    ["سَوْفَ", "يَذْهَبُ", "السُّوقِ"], "يَذْهَبُ",
+    "يَذْهَبُ (akan pergi) adalah fi'il. سَوْفَ hanya tanda waktu yang akan datang, sedangkan السُّوقِ adalah isim.", "سَوْفَ يَذْهَبُ أَبِي إِلَى السُّوقِ"),
+  q("p5-03", 5, "campuran", "Pada سَوْفَ يَقْرَأُ, kata سَوْفَ berfungsi sebagai ...",
+    ["Tanda fi'il yang menunjukkan waktu akan datang", "Isim karena didahului huruf jar", "Fi'il madhi"], "Tanda fi'il yang menunjukkan waktu akan datang",
+    "سَوْفَ bukan fi'il itu sendiri. Ia adalah tanda yang mendahului fi'il mudhari' dan menunjukkan waktu yang akan datang.", "سَوْفَ يَقْرَأُ"),
+  q("p5-04", 5, "campuran", "Apa arti جَلَسَتِ الْبِنْتُ فِي الْغُرْفَةِ?",
+    ["Anak perempuan itu telah duduk di kamar", "Anak perempuan itu akan duduk di kamar", "Anak perempuan itu sedang tidur di kamar"], "Anak perempuan itu telah duduk di kamar",
+    "جَلَسَتْ adalah fi'il madhi dengan ta' ta'nits sakinah yang berarti dia (perempuan) telah duduk. Tidak ada tanda waktu yang akan datang dan tidak ada kata tidur.", "جَلَسَتِ الْبِنْتُ فِي الْغُرْفَةِ"),
+  q("p5-05", 5, "campuran", "Manakah kata yang bukan isim?",
+    ["مَدْرَسَةٌ", "الطَّالِبُ", "يَدْرُسُ", "بَيْتٌ"], "يَدْرُسُ",
+    "يَدْرُسُ berarti belajar dan merupakan fi'il. Tiga kata lainnya adalah isim: مَدْرَسَةٌ (bertanwin), الطَّالِبُ (diawali ال), بَيْتٌ (bertanwin).", "مَدْرَسَةٌ — الطَّالِبُ — يَدْرُسُ — بَيْتٌ"),
+  q("p5-06", 5, "campuran", "Mengapa كَاتِبٌ (penulis) termasuk isim, sedangkan كَتَبَ (telah menulis) termasuk fi'il?",
+    ["كَاتِبٌ bertanwin dan tidak menunjukkan waktu; كَتَبَ menunjukkan pekerjaan yang telah terjadi", "كَاتِبٌ menunjukkan pekerjaan; كَتَبَ menunjukkan nama orang", "Keduanya fi'il karena berasal dari huruf yang sama"],
+    "كَاتِبٌ bertanwin dan tidak menunjukkan waktu; كَتَبَ menunjukkan pekerjaan yang telah terjadi",
+    "كَاتِبٌ adalah nama pelaku dan bertanwin (ciri isim), tanpa menunjukkan waktu. كَتَبَ menunjukkan pekerjaan menulis yang sudah terjadi (ciri fi'il).", "كَاتِبٌ — كَتَبَ"),
+  q("p5-07", 5, "campuran", "Kalimat manakah yang semua katanya isim?",
+    ["هٰذَا بَيْتٌ كَبِيرٌ", "يَكْتُبُ الطَّالِبُ", "سَيَذْهَبُ أَبِي"], "هٰذَا بَيْتٌ كَبِيرٌ",
+    "هٰذَا (ini, kata tunjuk), بَيْتٌ (rumah), dan كَبِيرٌ (besar) semuanya isim. Dua kalimat lainnya mengandung fi'il: يَكْتُبُ dan سَيَذْهَبُ."),
 ];
+
+// Urutan pilihan diputar secara tetap agar kunci jawaban tidak selalu di pilihan pertama.
+// Perhitungan skor memakai teks jawaban, bukan urutan, sehingga validasi server tetap sama.
+export const questions: Question[] = rawQuestions.map((item, index) => {
+  const n = item.options.length;
+  const shift = (index * 2 + 1) % n;
+  const options = item.options.map((_, i) => item.options[(i + shift) % n]);
+  return { ...item, options };
+});

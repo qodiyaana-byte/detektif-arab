@@ -1,69 +1,25 @@
 "use client";
-import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, LockKeyhole, MapPinned, Medal, Sparkles, Trophy, RotateCcw } from "lucide-react";
-import { questions, type Question } from "@/lib/questions";
+import { useMemo, useState, type CSSProperties } from "react";
+import { ArrowLeft, ArrowRight, Check, LockKeyhole, RotateCcw, Volume2, X } from "lucide-react";
+import { questions } from "@/lib/questions";
+import { mindmapRows, positions, slides, tableRows } from "@/lib/content";
 
-type Screen = "home" | "identity" | "map" | "learn" | "quiz" | "position-result" | "result";
+type Screen = "home" | "identity" | "map" | "learn" | "quiz" | "review" | "result";
 type Player = { id: string; nickname: string; classCode: string };
-type AnswerRecord = { questionId: string; category: string; answer: string; correct: boolean };
-type PositionScore = { score: number; total: number };
-type MaterialCard = { arabic: string; meaning: string; picture: string; note: string };
 
-const learningScenes: Record<number, string> = {
-  1: "/images/keluarga.jpg",
-  2: "/images/kakek-nenek.jpg",
-  3: "/images/ruang-keluarga.jpg",
-  4: "/images/ruang-keluarga.jpg",
-};
+const TOTAL_POS = positions.length;
+const QUIZ_POS = 5;
 
-const positions = [
-  { id: 1, title: "Rumah Kata", subtitle: "Kosakata kegiatan sehari-hari di rumah", icon: "🏡", color: "sand", kind: "materi" },
-  { id: 2, title: "Rahasia Kosakata", subtitle: "Pendalaman kata dan ungkapan sederhana", icon: "🗝️", color: "mint", kind: "materi" },
-  { id: 3, title: "Detektif Isim", subtitle: "Mengenali kata benda di sekitar rumah", icon: "🔎", color: "blue", kind: "materi + soal" },
-  { id: 4, title: "Misi Perbandingan Isim dan Fi'il", subtitle: "Membedakan nama benda dan kata tindakan", icon: "⚖️", color: "peach", kind: "materi + soal" },
-  { id: 5, title: "Tantangan Campuran", subtitle: "10 soal tebak gambar, isim, dan fi'il", icon: "🧩", color: "purple", kind: "10 soal" },
-  { id: 6, title: "Misi Detektif", subtitle: "10 soal penerapan dalam konteks", icon: "🧭", color: "blue", kind: "10 soal" },
-  { id: 7, title: "Tantangan Final", subtitle: "10 soal evaluasi seluruh materi", icon: "🏆", color: "gold", kind: "10 soal" },
-] as const;
-
-const materials: Record<number, MaterialCard[]> = {
-  1: [
-    { arabic: "أَسْتَيْقِظُ", meaning: "Saya bangun tidur", picture: "🌅", note: "Kegiatan pertama ketika memulai hari." },
-    { arabic: "أُصَلِّي", meaning: "Saya salat", picture: "🤲", note: "Ungkapan kegiatan beribadah." },
-    { arabic: "أَغْسِلُ وَجْهِي", meaning: "Saya mencuci wajah", picture: "🚿", note: "Kegiatan membersihkan diri pada pagi hari." },
-    { arabic: "أَغْسِلُ يَدَيَّ", meaning: "Saya mencuci kedua tangan", picture: "🧼", note: "Biasakan mencuci tangan sebelum makan." },
-    { arabic: "أَتَنَاوَلُ الْفُطُورَ", meaning: "Saya sarapan", picture: "🥣", note: "Kegiatan makan pada pagi hari." },
-    { arabic: "أَشْرَبُ الْمَاءَ", meaning: "Saya minum air", picture: "🥛", note: "Kegiatan minum untuk memenuhi kebutuhan tubuh." },
-    { arabic: "أَقْرَأُ الْكِتَابَ", meaning: "Saya membaca buku", picture: "📚", note: "Kegiatan belajar di rumah." },
-    { arabic: "أَكْتُبُ الدَّرْسَ", meaning: "Saya menulis pelajaran", picture: "✍️", note: "Kegiatan mengerjakan atau mencatat pelajaran." },
-    { arabic: "أُرَتِّبُ الْغُرْفَةَ", meaning: "Saya merapikan kamar", picture: "🧹", note: "Kegiatan menjaga rumah tetap rapi." },
-    { arabic: "أَنَامُ", meaning: "Saya tidur", picture: "🌙", note: "Kegiatan beristirahat pada malam hari." },
-  ],
-  2: [
-    { arabic: "أَنَا أَسْتَيْقِظُ مُبَكِّرًا", meaning: "Saya bangun lebih awal", picture: "⏰", note: "أَنَا berarti saya. أَسْتَيْقِظُ menunjukkan kegiatan bangun tidur." },
-    { arabic: "أَنَا أَغْسِلُ يَدَيَّ", meaning: "Saya mencuci kedua tangan", picture: "🫧", note: "Kata أَغْسِلُ menunjukkan tindakan mencuci." },
-    { arabic: "أَنَا أَتَنَاوَلُ الْفُطُورَ", meaning: "Saya sarapan", picture: "🍞", note: "الْفُطُورَ berkaitan dengan sarapan atau makanan pagi." },
-    { arabic: "أَنَا أَقْرَأُ الْكِتَابَ", meaning: "Saya membaca buku", picture: "📖", note: "الْكِتَابَ adalah benda yang dibaca." },
-    { arabic: "أَنَا أُرَتِّبُ الْغُرْفَةَ", meaning: "Saya merapikan kamar", picture: "🛏️", note: "الْغُرْفَةَ berarti kamar. أُرَتِّبُ menunjukkan kegiatan merapikan." },
-    { arabic: "أَنَا أَنَامُ لَيْلًا", meaning: "Saya tidur pada malam hari", picture: "🌜", note: "لَيْلًا berarti pada malam hari." },
-  ],
-  3: [
-    { arabic: "الِاسْمُ", meaning: "Pengertian isim", picture: "🏷️", note: "Isim adalah kata yang menunjukkan nama orang, hewan, benda, tempat, atau sesuatu. Contoh: طَالِبٌ (siswa), بَيْتٌ (rumah), مَدْرَسَةٌ (sekolah)." },
-    { arabic: "كِتَابٌ ← الْكِتَابُ", meaning: "Ciri isim: tanwin dan ال", picture: "📘", note: "Banyak isim dapat menerima tanwin, seperti كِتَابٌ. Isim juga dapat memakai ال, menjadi الْكِتَابُ." },
-    { arabic: "الطَّالِبُ", meaning: "Siswa", picture: "🧑🏻‍🎓", note: "الطَّالِبُ adalah isim karena menamai orang. Isim juga dapat menunjukkan nama orang atau profesi." },
-    { arabic: "الْمَدْرَسَةُ", meaning: "Sekolah", picture: "🏫", note: "الْمَدْرَسَةُ adalah isim karena menamai tempat." },
-    { arabic: "الْفِعْلُ", meaning: "Pengertian fi'il", picture: "🏃🏻", note: "Fi'il adalah kata yang menunjukkan pekerjaan, tindakan, atau kejadian. Contoh: يَكْتُبُ (menulis), يَقْرَأُ (membaca)." },
-    { arabic: "يَكْتُبُ", meaning: "Dia sedang/akan menulis", picture: "✍️", note: "Fi'il mudhari' menunjukkan kegiatan yang sedang atau akan dilakukan. Salah satu cirinya sering diawali أ، ن، ي، atau ت." },
-    { arabic: "يَقْرَأُ", meaning: "Dia sedang/akan membaca", picture: "📖", note: "يَقْرَأُ adalah fi'il karena menyatakan tindakan membaca, bukan nama benda." },
-  ],
-  4: [
-    { arabic: "كِتَابٌ", meaning: "Buku (isim)", picture: "📚", note: "Isim menamai benda. Buku dapat dilihat dan dipegang. Kata كِتَابٌ menjawab pertanyaan: benda apa?" },
-    { arabic: "يَقْرَأُ", meaning: "Membaca (fi'il)", picture: "📖", note: "Fi'il menunjukkan tindakan. يَقْرَأُ menjawab pertanyaan: sedang melakukan apa?" },
-    { arabic: "قَلَمٌ", meaning: "Pena (isim)", picture: "🖊️", note: "قَلَمٌ adalah nama benda sehingga termasuk isim." },
-    { arabic: "يَكْتُبُ", meaning: "Menulis (fi'il)", picture: "✍️", note: "يَكْتُبُ menunjukkan tindakan menulis sehingga termasuk fi'il." },
-    { arabic: "الطَّالِبُ يَكْتُبُ", meaning: "Siswa sedang menulis", picture: "🧑🏻‍🎓", note: "الطَّالِبُ = isim (orang). يَكْتُبُ = fi'il (tindakan). Satu kalimat dapat memuat keduanya." },
-  ],
-};
+function Stars({ value, size = 56 }: { value: number; size?: number }) {
+  // value 0-100 dibagi menjadi 5 bintang; bintang terakhir bisa terisi sebagian.
+  const filled = Math.max(0, Math.min(5, (value / 100) * 5));
+  return <div className="stars" role="img" aria-label={`${(Math.round(filled * 10) / 10)} dari 5 bintang`} style={{ fontSize: size }}>
+    {[0, 1, 2, 3, 4].map((i) => {
+      const pct = Math.round(Math.max(0, Math.min(1, filled - i)) * 100);
+      return <span key={i} className="star" style={{ "--fill": `${pct}%`, animationDelay: `${i * 0.12}s` } as CSSProperties}>★</span>;
+    })}
+  </div>;
+}
 
 export default function Page() {
   const [screen, setScreen] = useState<Screen>("home");
@@ -71,171 +27,227 @@ export default function Page() {
   const [classCode, setClassCode] = useState("");
   const [player, setPlayer] = useState<Player | null>(null);
   const [position, setPosition] = useState(1);
-  const [cardIndex, setCardIndex] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<AnswerRecord[]>([]);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState("");
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completed, setCompleted] = useState<number[]>([]);
-  const [scores, setScores] = useState<Record<number, PositionScore>>({});
-  const [lastPosition, setLastPosition] = useState(1);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const activeQuestions = useMemo(() => questions.filter((item) => item.position === position), [position]);
-  const currentQuestion: Question | undefined = activeQuestions[questionIndex];
-  const currentMaterials = materials[position] || [];
-  const totalCorrect = Object.values(scores).reduce((sum, item) => sum + item.score, 0);
-  const totalQuestions = Object.values(scores).reduce((sum, item) => sum + item.total, 0);
-  const totalScore = totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+
+  const posQuestions = useMemo(() => questions.filter((item) => item.position === position), [position]);
+  const currentQuestion = posQuestions[qIndex];
+  const posSlides = slides[position] || [];
+  const slide = posSlides[slideIndex];
+
   const isUnlocked = (id: number) => id === 1 || completed.includes(id - 1);
-  const progress = Math.round((completed.length / 7) * 100);
+  const scoreOf = (pos: number) => {
+    const list = questions.filter((item) => item.position === pos);
+    const correct = list.filter((item) => answers[item.id] === item.answer).length;
+    return { correct, total: list.length, percent: list.length ? Math.round((correct / list.length) * 100) : 0 };
+  };
+  const answeredPositions = [1, 2, 3, 4, 5].filter((id) => completed.includes(id));
+  const totalCorrect = answeredPositions.reduce((sum, id) => sum + scoreOf(id).correct, 0);
+  const totalAnswered = answeredPositions.reduce((sum, id) => sum + scoreOf(id).total, 0);
+  const finalScore = Math.round((totalCorrect / questions.length) * 100);
+  const nextPosition = positions.find((item) => !completed.includes(item.id) && isUnlocked(item.id));
+  const progress = Math.round((completed.length / TOTAL_POS) * 100);
+
+  const speak = (text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "ar-SA";
+    utterance.rate = 0.78;
+    window.speechSynthesis.speak(utterance);
+  };
 
   const startPlayer = async () => {
     if (!nickname.trim()) return;
-    const p = { id: crypto.randomUUID(), nickname: nickname.trim(), classCode: classCode.trim() || "UMUM" };
+    const p: Player = { id: crypto.randomUUID(), nickname: nickname.trim(), classCode: classCode.trim() || "UMUM" };
     setPlayer(p);
     setScreen("map");
     try {
       await fetch("/api/players", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) });
-    } catch { /* Permainan tetap dapat berjalan saat penyimpanan belum tersedia. */ }
+    } catch { /* Permainan tetap berjalan walau penyimpanan belum tersedia. */ }
   };
 
-  const openPosition = (id: number) => {
-    if (!isUnlocked(id)) return;
-    setPosition(id);
-    setCardIndex(0);
-    setQuestionIndex(0);
-    setSelected("");
-    if (id <= 4) setScreen("learn");
-    else setScreen("quiz");
-  };
-
-  const saveResults = async (records: AnswerRecord[]) => {
+  const saveResults = async (record: Record<string, string>) => {
     if (!player) return;
     setSaving(true);
     try {
       const response = await fetch("/api/attempts", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerId: player.id, answers: records.map((item) => ({ questionId: item.questionId, answer: item.answer })) }),
+        body: JSON.stringify({ playerId: player.id, answers: questions.map((item) => ({ questionId: item.id, answer: record[item.id] ?? "" })) }),
       });
       setSaved(response.ok);
     } catch { setSaved(false); }
     finally { setSaving(false); }
   };
 
-  const beginPositionQuiz = () => { setQuestionIndex(0); setSelected(""); setScreen("quiz"); };
-
-  const submitAnswer = () => {
-    if (!selected || !currentQuestion || !player) return;
-    const record: AnswerRecord = { questionId: currentQuestion.id, category: currentQuestion.category, answer: selected, correct: selected === currentQuestion.answer };
-    const nextAnswers = [...answers, record];
-    setAnswers(nextAnswers);
-    setSelected("");
-    if (questionIndex < activeQuestions.length - 1) {
-      setQuestionIndex((value) => value + 1);
-      return;
-    }
-    const positionAnswers = nextAnswers.filter((item) => activeQuestions.some((question) => question.id === item.questionId));
-    const positionScore = { score: positionAnswers.filter((item) => item.correct).length, total: activeQuestions.length };
-    const nextScores = { ...scores, [position]: positionScore };
-    const nextCompleted = completed.includes(position) ? completed : [...completed, position];
-    setScores(nextScores);
-    setCompleted(nextCompleted);
-    setLastPosition(position);
-    setScreen("position-result");
-    if (position === 7) void saveResults(nextAnswers);
+  const openPosition = (id: number) => {
+    if (!isUnlocked(id)) return;
+    setPosition(id); setSlideIndex(0); setQIndex(0); setSelected("");
+    if (id === TOTAL_POS) {
+      setCompleted((list) => (list.includes(id) ? list : [...list, id]));
+      setScreen("result");
+    } else if (completed.includes(id)) setScreen("review");
+    else if (slides[id]) setScreen("learn");
+    else setScreen("quiz");
   };
 
-  const finishMaterial = () => {
-    if (position === 1 || position === 2) beginPositionQuiz();
-    else beginPositionQuiz();
+  const submitAnswer = () => {
+    if (!selected || !currentQuestion) return;
+    const nextAnswers = { ...answers, [currentQuestion.id]: selected };
+    setAnswers(nextAnswers);
+    setSelected("");
+    if (qIndex < posQuestions.length - 1) { setQIndex(qIndex + 1); return; }
+    setCompleted((list) => (list.includes(position) ? list : [...list, position]));
+    setScreen("review");
+    if (position === QUIZ_POS) void saveResults(nextAnswers);
   };
 
   const resetAdventure = () => {
-    setPosition(1); setCardIndex(0); setQuestionIndex(0); setAnswers([]); setSelected("");
-    setCompleted([]); setScores({}); setSaved(false); setScreen("map");
+    setPosition(1); setSlideIndex(0); setQIndex(0); setSelected(""); setAnswers({});
+    setCompleted([]); setSaved(false); setScreen("map");
   };
 
-  const questionLabel = (question: Question) => question.type === "picture" ? "TEBAK GAMBAR" : question.type === "isim" ? "MENGENALI ISIM" : question.type === "fiil" ? "MENGENALI FI'IL" : question.type === "meaning" ? "ARTI KOSAKATA" : "PEMAHAMAN KALIMAT";
+  const predicate = finalScore >= 90 ? "Detektif Super!" : finalScore >= 75 ? "Detektif Hebat!" : finalScore >= 60 ? "Detektif Handal" : "Detektif Pemula, Ayo Berlatih Lagi!";
+  const goHome = () => setScreen(player ? "map" : "home");
 
-  return <main className="app-shell adventure-app">
+  return <main className="app-shell">
     <header className="topbar">
-      <button className="brand" onClick={() => setScreen(player ? "map" : "home")}><span className="brand-mark">🕵️</span><span><b>Detektif Arab</b><small>مُغَامَرَةُ اللُّغَةِ الْعَرَبِيَّةِ</small></span></button>
-      <nav><button onClick={() => setScreen(player ? "map" : "home")}>Beranda</button><a href="/guru">Ruang Guru</a></nav>
-      <div className="lang-pill">عربي · Indonesia</div>
+      <button className="brand" onClick={goHome}><span className="brand-mark">🕵️</span><span><b>Detektif Arab</b><small>الاِسْمُ وَالْفِعْلُ</small></span></button>
+      <nav><button onClick={goHome}>Beranda</button><a href="/guru">Ruang Guru</a></nav>
     </header>
 
-    {screen === "home" && <section className="hero adventure-hero">
-      <div className="hero-copy"><span className="eyebrow"><Sparkles size={15} /> PETUALANGAN BAHASA ARAB KELAS VII</span>
-        <h1>Detektif Arab:<br /><em>Misi di Rumah!</em></h1>
-        <p>Bantu Sami menjelajahi rumah, menemukan kosakata kegiatan sehari-hari, mengenali isim dan fi'il, lalu menyelesaikan tujuh pos petualangan.</p>
-        <div className="hero-actions"><button className="primary" onClick={() => setScreen("identity")}>Mulai Petualangan <ArrowRight size={18} /></button><button className="secondary" onClick={() => document.getElementById("cara-bermain")?.scrollIntoView({ behavior: "smooth" })}>Cara Bermain</button></div>
-        <div className="hero-stats"><span><b>7</b> Pos petualangan</span><span><b>56</b> Soal latihan dan evaluasi</span><span><b>Bahasa Arab</b> dan Indonesia</span></div>
+    {screen === "home" && <section className="hero">
+      <div className="hero-copy">
+        <span className="eyebrow">PETUALANGAN BAHASA ARAB KELAS VII</span>
+        <h1>Detektif Arab:<br /><em>Misi Isim dan Fi&apos;il</em></h1>
+        <p>Bantu Sami mengenali isim dan fi&apos;il. Jelajahi enam pos, pelajari materinya, jawab soal evaluasi, lalu kumpulkan bintang terbanyak.</p>
+        <div className="hero-actions"><button className="primary" onClick={() => setScreen("identity")}>Mulai Petualangan <ArrowRight size={18} /></button></div>
+        <div className="hero-stats"><span><b>6</b> Pos petualangan</span><span><b>30</b> Soal evaluasi</span><span><b>5</b> Bintang</span></div>
       </div>
-      <div className="hero-art adventure-art"><img className="hero-reference-image" src="/images/detektif-cover.jpg" alt="Ilustrasi detektif anak menjelajahi rumah keluarga" /></div>
+      <div className="hero-art"><img src="/images/detektif-cover.jpg" alt="Ilustrasi detektif anak" /></div>
     </section>}
 
-    {screen === "identity" && <section className="center-panel identity-panel">
-      <div className="panel-emoji">🕵🏻‍♀️</div><span className="eyebrow">IDENTITAS DETEKTIF</span><h2>Siapa nama detektif hari ini?</h2><p>Masukkan nama panggilan dan kode kelas. Setelah masuk, peta petualangan akan terbuka.</p>
-      <label>Nama panggilan</label><input value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="Contoh: Sami01" maxLength={30} />
-      <label>Kode kelas <span className="optional">(opsional)</span></label><input value={classCode} onChange={(event) => setClassCode(event.target.value)} placeholder="Contoh: VII-A" maxLength={20} />
-      <button className="primary full" disabled={!nickname.trim()} onClick={startPlayer}>Masuk ke Peta Petualangan <ArrowRight size={18} /></button>
+    {screen === "identity" && <section className="center-panel">
+      <div className="panel-emoji">🕵🏻‍♀️</div><span className="eyebrow">IDENTITAS DETEKTIF</span>
+      <h2>Siapa nama detektif hari ini?</h2><p>Masukkan nama panggilan dan kode kelas untuk membuka peta misi.</p>
+      <label>Nama panggilan</label><input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="Contoh: Sami01" maxLength={30} />
+      <label>Kode kelas <span className="optional">(opsional)</span></label><input value={classCode} onChange={(e) => setClassCode(e.target.value)} placeholder="Contoh: VII-A" maxLength={20} />
+      <button className="primary full" disabled={!nickname.trim()} onClick={startPlayer}>Lanjut ke Peta Misi <ArrowRight size={18} /></button>
       <button className="text-button" onClick={() => setScreen("home")}><ArrowLeft size={16} /> Kembali</button>
     </section>}
 
-    {screen === "map" && <section className="content-section map-screen">
-      <div className="map-welcome"><div><span className="eyebrow"><MapPinned size={15} /> PETA PETUALANGAN</span><h2>Siap menjelajah, {player?.nickname || "Detektif"}?</h2><p>Selesaikan setiap pos secara berurutan. Pos berikutnya terbuka setelah pos sebelumnya tuntas.</p></div><div className="map-progress-card"><div className="progress-ring"><b>{completed.length}/7</b></div><span>Pos terselesaikan</span><div className="map-progress-track"><i style={{ width: `${progress}%` }} /></div><small>{progress}% petualangan selesai</small></div></div>
-      <div className="adventure-map">
-        <div className="map-scenery scenery-one">🌳</div><div className="map-scenery scenery-two">⛰️</div><div className="map-scenery scenery-three">🌴</div><div className="map-river" />
-        <svg className="trail-svg" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true"><path d="M110 110 C240 35 300 185 405 170 S550 45 650 140 S810 260 875 365 S690 450 535 390 S310 460 150 365" /></svg>
-        {positions.map((item) => {
-          const unlocked = isUnlocked(item.id);
-          const done = completed.includes(item.id);
-          return <button key={item.id} className={`map-stop stop-${item.id} ${unlocked ? "unlocked" : "locked"} ${done ? "done" : ""}`} disabled={!unlocked || done} onClick={() => openPosition(item.id)}>
-            <span className="stop-marker">{done ? <Check size={25} /> : unlocked ? item.icon : <LockKeyhole size={22} />}</span>
-            <span className="stop-copy"><small>POS {String(item.id).padStart(2, "0")}</small><b>{item.title}</b><em>{done ? "Selesai" : unlocked ? item.kind : "Terkunci"}</em></span>
-          </button>;
-        })}
-        <div className="map-treasure">🏆<small>TAMAT</small></div>
+    {screen === "map" && <section className="map-screen">
+      <div className="map-frame">
+        <div className="hud hud-left"><span className="avatar">🕵️</span><span><b>{player?.nickname || "Detektif"}</b><small>{player?.classCode || "UMUM"}</small></span></div>
+        <div className="hud hud-right"><span className="hud-star">★</span><span><b>{totalCorrect} benar</b><small>{completed.length}/{TOTAL_POS} pos · {progress}%</small></span></div>
+        <div className="map-board">
+          <div className="deco d1">🌳</div><div className="deco d2">🌲</div><div className="deco d3">🌴</div><div className="deco d4">⛰️</div><div className="deco d5">🌷</div><div className="deco d6">🏡</div><div className="deco d7">🌳</div><div className="deco d8">🐑</div><div className="pond" />
+          <svg className="trail" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
+            <path className="trail-edge" d="M110 420 C150 250 200 150 280 180 S400 400 470 410 S560 170 640 168 S760 380 810 396 S880 150 910 144" />
+            <path className="trail-core" d="M110 420 C150 250 200 150 280 180 S400 400 470 410 S560 170 640 168 S760 380 810 396 S880 150 910 144" />
+          </svg>
+          {positions.map((item) => {
+            const unlocked = isUnlocked(item.id);
+            const done = completed.includes(item.id);
+            const isNext = nextPosition?.id === item.id;
+            return <button key={item.id} className={`pin ${unlocked ? "open" : "locked"} ${done ? "done" : ""} ${isNext ? "next" : ""}`} style={{ left: `${item.x}%`, top: `${item.y}%` }} disabled={!unlocked} onClick={() => openPosition(item.id)} aria-label={`Pos ${item.id}: ${item.title}`}>
+              <span className="pin-badge">{done ? <Check size={18} /> : unlocked ? item.id : <LockKeyhole size={16} />}</span>
+              <span className="pin-icon">{unlocked ? item.icon : "🔒"}</span>
+              <span className="pin-label"><small>POS {item.id}</small><b>{item.title}</b></span>
+            </button>;
+          })}
+        </div>
+        <div className="map-bottom">
+          <button className="primary" onClick={() => (nextPosition ? openPosition(nextPosition.id) : setScreen("result"))}>{nextPosition ? <>Lanjutkan Misi: {nextPosition.title} <ArrowRight size={18} /></> : <>Lihat Skor Akhir <ArrowRight size={18} /></>}</button>
+        </div>
       </div>
-      <div className="map-legend"><span><i className="legend-open" /> Pos terbuka</span><span><i className="legend-done" /> Pos selesai</span><span><i className="legend-lock" /> Pos terkunci</span></div>
-      <div className="tip-box"><span>🧭</span><p><b>Petunjuk perjalanan:</b> Mulailah dari Pos 1. Pelajari materi, kerjakan cek pemahaman, lalu lanjutkan ke pos berikutnya. Kamu dapat membuka kembali pos yang sudah selesai.</p></div>
+      <div className="map-legend"><span><i className="lg-open" /> Terbuka</span><span><i className="lg-done" /> Selesai</span><span><i className="lg-lock" /> Terkunci</span></div>
     </section>}
 
-    {screen === "learn" && <section className="content-section learning-screen">
+    {screen === "learn" && slide && <section className="content-section">
       <button className="back-link" onClick={() => setScreen("map")}><ArrowLeft size={16} /> Kembali ke peta</button>
-      <div className="learning-heading"><div><span className="eyebrow">POS {String(position).padStart(2, "0")} · TAHAP BELAJAR</span><h2>{positions[position - 1].title}</h2><p>{positions[position - 1].subtitle}</p></div><span className="progress-label">Materi {cardIndex + 1} dari {currentMaterials.length}</span></div>
-      <div className="learning-card adventure-learning-card"><div className={`learning-illustration scene-position-${position}`} role="img" aria-label={`Ilustrasi ${currentMaterials[cardIndex]?.meaning}`}><div className="scene-sky"><span>☀️</span><span>☁️</span></div><div className="scene-action">{position === 2 && cardIndex === 0 ? <><span className="scene-bed">🛏️</span><span className="scene-person">🧒🏻</span><span className="scene-clock">05.00</span></> : position === 3 ? <><span>🧑🏻‍🎓</span><span>📚</span></> : position === 4 ? <><span>🧒🏻</span><span>{cardIndex % 2 === 0 ? "📖" : "✍️"}</span></> : <><span>{currentMaterials[cardIndex]?.picture}</span><span className="scene-person">🧒🏻</span></>}</div><div className="scene-caption"><b>{currentMaterials[cardIndex]?.meaning}</b><small>{position === 2 && cardIndex === 0 ? "Pagi hari • siswa bangun dari tempat tidur" : "Amati aktivitas dan benda pada ilustrasi"}</small></div></div><div className="word-content"><span className="eyebrow"><BookOpen size={14} /> KARTU MATERI</span><div className="arabic-word" dir="rtl">{currentMaterials[cardIndex]?.arabic}</div><h3>{currentMaterials[cardIndex]?.meaning}</h3><p className="learning-note">{currentMaterials[cardIndex]?.note}</p>
-        <div className="word-dots">{currentMaterials.map((_, index) => <span key={index} className={index <= cardIndex ? "active" : ""} />)}</div>
-        <button className="primary" onClick={() => { if (cardIndex < currentMaterials.length - 1) setCardIndex(cardIndex + 1); else finishMaterial(); }}>{cardIndex < currentMaterials.length - 1 ? "Materi Berikutnya" : "Mulai Cek Pemahaman"} <ArrowRight size={18} /></button>
-      </div></div>
-      {position === 3 && <div className="concept-note"><b>Ingat:</b> Isim menamai orang, benda, tempat, atau sesuatu. Fi'il menunjukkan pekerjaan atau tindakan. Pelajari definisi dan cirinya sebelum mengerjakan soal.</div>}
-      {position === 4 && <div className="concept-note"><b>Bandingkan:</b> كِتَابٌ (buku) adalah isim, sedangkan يَقْرَأُ (membaca) adalah fi'il. Isim menjawab “apa/siapa?”, fi'il menjawab “melakukan apa?”.</div>}
-    </section>}
-
-    {screen === "quiz" && currentQuestion && <section className="quiz-wrap adventure-quiz-wrap">
-      <div className="quiz-top"><button className="back-link" onClick={() => setScreen("map")}><ArrowLeft size={16} /> Kembali ke peta</button><span>POS {position} · SOAL {questionIndex + 1}/{activeQuestions.length}</span></div>
-      <div className="progress-track"><div style={{ width: `${((questionIndex + 1) / activeQuestions.length) * 100}%` }} /></div>
-      <div className="quiz-card adventure-quiz-card"><div className="quiz-card-meta"><span className="eyebrow">{questionLabel(currentQuestion)}</span><span className="question-counter">{questionIndex + 1} / {activeQuestions.length}</span></div>
-        {currentQuestion.type === "picture" && currentQuestion.picture && <div className="question-picture" role="img" aria-label="Ilustrasi petunjuk soal"><span>{currentQuestion.picture}</span></div>}
-        <h2>{currentQuestion.prompt}</h2>
-        {currentQuestion.type !== "picture" && currentQuestion.picture && <div className="question-picture" role="img" aria-label="Ilustrasi petunjuk soal"><span>{currentQuestion.picture}</span></div>}
-        {currentQuestion.type !== "picture" && currentQuestion.arabic && <div className="arabic-question" dir="rtl">{currentQuestion.arabic}</div>}
-        <div className="answer-grid">{currentQuestion.options.map((option, index) => <button key={option} className={`answer-option ${selected === option ? "selected" : ""}`} onClick={() => setSelected(option)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}</div>
-        <button className="primary full" disabled={!selected} onClick={submitAnswer}>{questionIndex === activeQuestions.length - 1 ? position === 7 ? "Selesaikan Petualangan" : "Selesaikan Pos" : "Jawaban Berikutnya"} <ArrowRight size={18} /></button>
+      <div className="learning-heading"><div><span className="eyebrow">POS {position} · {positions[position - 1].title.toUpperCase()}</span><h2>{slide.title}</h2></div><span className="progress-label">Materi {slideIndex + 1} dari {posSlides.length}</span></div>
+      <div className="slide-card">
+        {slide.kind === "definition" && <div className="definition">
+          <div className="arabic-big" dir="rtl">{slide.arabic}</div>
+          <p className="definition-text">{slide.text}</p>
+          <div className="example-row">{slide.examples.map((ex) => <button key={ex.arabic} className="example-chip" onClick={() => speak(ex.arabic)}><span dir="rtl">{ex.arabic}</span><small>{ex.meaning}</small><Volume2 size={15} /></button>)}</div>
+        </div>}
+        {slide.kind === "signs" && <div>
+          <p className="slide-intro">{slide.intro}</p>
+          <div className="sign-grid">{slide.items.map((item) => <div className="sign-card" key={item.name}>
+            <b>{item.name}</b><small dir="ltr">{item.rule}</small>
+            <button className="sign-example" onClick={() => speak(item.arabic)}><span dir="rtl">{item.arabic}</span><em>{item.meaning}</em><Volume2 size={15} /></button>
+          </div>)}</div>
+        </div>}
+        {slide.kind === "words" && <div>
+          <p className="slide-intro">{slide.intro}</p>
+          <div className="word-grid">{slide.words.map((w) => <button className="word-card" key={w.arabic} onClick={() => speak(w.arabic)}><span className="word-ar" dir="rtl">{w.arabic}</span><span className="word-id">{w.meaning}</span><Volume2 size={15} /></button>)}</div>
+        </div>}
+        {slide.kind === "mindmap" && <div className="mindmap">
+          <div className="mm-root">كَلِمَةٌ<small>Kata dalam bahasa Arab</small></div>
+          <div className="mm-heads"><div className="mm-head isim"><b>الاِسْمُ</b><small>ISIM</small></div><div className="mm-vs">VS</div><div className="mm-head fiil"><b>الْفِعْلُ</b><small>FI&apos;IL</small></div></div>
+          {mindmapRows.map((row) => <div className="mm-row" key={row.aspect}><div className="mm-node isim" dir="ltr">{row.isim}</div><div className="mm-aspect">{row.aspect}</div><div className="mm-node fiil" dir="ltr">{row.fiil}</div></div>)}
+        </div>}
+        {slide.kind === "table" && <div>
+          <p className="slide-intro">Gunakan tabel ini untuk mengingat perbedaan isim dan fi&apos;il.</p>
+          <div className="table-scroll"><table className="diff-table"><thead><tr><th>Aspek</th><th className="isim">Isim</th><th className="fiil">Fi&apos;il</th></tr></thead>
+            <tbody>{tableRows.map((row) => <tr key={row.aspect}><th dir="ltr">{row.aspect}</th><td dir="ltr">{row.isim}</td><td dir="ltr">{row.fiil}</td></tr>)}</tbody></table></div>
+        </div>}
+        <div className="slide-nav">
+          <button className="secondary" disabled={slideIndex === 0} onClick={() => setSlideIndex(slideIndex - 1)}><ArrowLeft size={16} /> Sebelumnya</button>
+          <div className="word-dots">{posSlides.map((_, i) => <span key={i} className={i <= slideIndex ? "active" : ""} />)}</div>
+          <button className="primary" onClick={() => { if (slideIndex < posSlides.length - 1) setSlideIndex(slideIndex + 1); else { setQIndex(0); setSelected(""); setScreen("quiz"); } }}>{slideIndex < posSlides.length - 1 ? "Berikutnya" : "Mulai Evaluasi"} <ArrowRight size={16} /></button>
+        </div>
       </div>
     </section>}
 
-    {screen === "position-result" && <section className="result-panel position-result-panel"><div className="trophy">{scores[lastPosition]?.score === scores[lastPosition]?.total ? "🌟" : "📝"}</div><span className="eyebrow">HASIL POS {lastPosition}</span><h2>Hasil latihanmu, {player?.nickname}!</h2><div className="big-score">{scores[lastPosition]?.score || 0}<small>/{scores[lastPosition]?.total || 0}</small></div><span className="muted">Jawaban benar</span><div className="wrong-number-summary">Nomor soal yang perlu dipelajari kembali: {activeQuestions.reduce((numbers, question, index) => { const record = answers.find((item) => item.questionId === question.id); if (!record?.correct) numbers.push(index + 1); return numbers; }, [] as number[]).join(", ") || "Tidak ada, semua jawaban benar!"}</div><div className="review-list">{activeQuestions.map((question, index) => { const record = answers.find((item) => item.questionId === question.id); const correct = record?.correct; return <article className={`review-item ${correct ? "review-correct" : "review-wrong"}`} key={question.id}><div className="review-heading"><b>Soal {index + 1}</b><span>{correct ? "✓ Benar" : "✕ Salah"}</span></div><p>{question.prompt}</p>{question.arabic && <div className="review-arabic" dir="rtl">{question.arabic}</div>}<div className="review-answer"><small>Jawaban siswa</small><b>{record?.answer || "Tidak dijawab"}</b></div><div className="review-answer"><small>Jawaban yang tepat</small><b>{question.answer}</b></div><p className="review-explanation">{question.explanation}</p></article>; })}</div><div className="hero-actions centered"><button className="primary" onClick={() => setScreen(lastPosition === 7 ? "result" : "map")}>{lastPosition === 7 ? "Lihat Rekap Akhir" : "Lanjutkan Petualangan"} <ArrowRight size={17}/></button></div></section>}
+    {screen === "quiz" && currentQuestion && <section className="quiz-wrap">
+      <div className="quiz-top"><button className="back-link" onClick={() => setScreen("map")}><ArrowLeft size={16} /> Kembali ke peta</button><span>POS {position} · SOAL {qIndex + 1}/{posQuestions.length}</span></div>
+      <div className="progress-track"><div style={{ width: `${((qIndex + 1) / posQuestions.length) * 100}%` }} /></div>
+      <div className="quiz-card">
+        <span className="eyebrow">EVALUASI POS {position}</span>
+        <h2>{currentQuestion.prompt}</h2>
+        {currentQuestion.arabic && <div className="arabic-question" dir="rtl">{currentQuestion.arabic}<button aria-label="Dengarkan" onClick={() => speak(currentQuestion.arabic || "")}><Volume2 size={18} /></button></div>}
+        <div className="answer-grid">{currentQuestion.options.map((option, index) => <button key={option} className={`answer-option ${selected === option ? "selected" : ""}`} onClick={() => setSelected(option)}><span>{String.fromCharCode(65 + index)}</span><i dir="auto">{option}</i></button>)}</div>
+        <button className="primary full" disabled={!selected} onClick={submitAnswer}>{qIndex === posQuestions.length - 1 ? "Selesaikan dan Lihat Kunci Jawaban" : "Jawaban Berikutnya"} <ArrowRight size={18} /></button>
+      </div>
+    </section>}
 
-    {screen === "result" && <section className="result-panel adventure-result-panel"><div className="trophy"><Trophy size={54} /></div><span className="eyebrow"><Medal size={15} /> PETUALANGAN SELESAI</span><h2>Selamat, Detektif {player?.nickname}!</h2><p>Kamu telah menuntaskan tujuh pos petualangan bahasa Arab. Berikut rekap pencapaianmu.</p>
-      <div className="big-score">{totalScore}<small>/100</small></div><span className="muted">Nilai keseluruhan</span>
-      <div className="achievement-grid">{positions.map((item) => { const result = scores[item.id]; return <div className="achievement-card" key={item.id}><span>{item.icon}</span><small>POS {item.id}</small><b>{result ? `${result.score}/${result.total}` : "-"}</b><em>{result ? `${Math.round((result.score / result.total) * 100)}%` : "Belum ada nilai"}</em></div>; })}</div>
-      <div className="result-summary"><div><span>Jawaban benar</span><b>{totalCorrect} dari {totalQuestions}</b></div><div><span>Pos selesai</span><b>{completed.length} dari 7</b></div><div><span>Predikat</span><b>{totalScore >= 90 ? "Sangat Hebat" : totalScore >= 80 ? "Hebat" : totalScore >= 70 ? "Terus Berlatih" : "Semangat Belajar"}</b></div></div>
+    {screen === "review" && <section className="content-section">
+      <div className="review-head"><span className="eyebrow">KUNCI JAWABAN · POS {position}</span><h2>{positions[position - 1].title}</h2>
+        <div className="review-score"><b>{scoreOf(position).correct}</b>/{scoreOf(position).total} benar <em>· nilai {scoreOf(position).percent}</em></div></div>
+      <div className="review-list">{posQuestions.map((item, index) => {
+        const mine = answers[item.id] ?? "";
+        const right = mine === item.answer;
+        return <article key={item.id} className={`review-item ${right ? "right" : "wrong"}`}>
+          <div className="review-q"><span className="review-no">{index + 1}</span><div><b>{item.prompt}</b>{item.arabic && <div className="review-ar" dir="rtl">{item.arabic}</div>}</div><span className="review-mark">{right ? <Check size={18} /> : <X size={18} />}</span></div>
+          <div className="review-row"><small>Jawabanmu</small><p className={right ? "ok" : "bad"} dir="auto">{mine || "(tidak dijawab)"}</p></div>
+          {!right && <div className="review-row"><small>Jawaban yang benar</small><p className="ok" dir="auto">{item.answer}</p></div>}
+          <div className="review-reason"><small>Alasan</small><p>{item.reason}</p></div>
+        </article>;
+      })}</div>
+      <div className="hero-actions centered"><button className="primary" onClick={() => setScreen("map")}>{position === QUIZ_POS ? "Kembali ke Peta, Buka Aula Bintang" : "Kembali ke Peta"} <ArrowRight size={18} /></button></div>
+    </section>}
+
+    {screen === "result" && <section className="result-panel">
+      <span className="eyebrow">POS 6 · AULA BINTANG</span>
+      <h2>Hebat, {player?.nickname || "Detektif"}!</h2>
+      <Stars value={finalScore} />
+      <div className="big-score">{finalScore}<small>/100</small></div>
+      <div className="predicate">{predicate}</div>
+      <p className="result-note">Bintang terisi sesuai nilai akhir: setiap 20 poin mengisi satu bintang penuh. Nilai akhir dihitung dari {totalCorrect} jawaban benar dari {questions.length} soal.</p>
+      <div className="score-grid">{positions.slice(0, QUIZ_POS).map((item) => { const s = scoreOf(item.id); const done = completed.includes(item.id); return <div className="score-card" key={item.id}><span>{item.icon}</span><small>POS {item.id}</small><b>{done ? `${s.correct}/${s.total}` : "-"}</b><em>{done ? `Nilai ${s.percent}` : "Belum dikerjakan"}</em></div>; })}</div>
+      <div className="result-summary"><div><span>Jawaban benar</span><b>{totalCorrect} dari {questions.length}</b></div><div><span>Soal sudah dikerjakan</span><b>{totalAnswered} dari {questions.length}</b></div><div><span>Nilai akhir</span><b>{finalScore} / 100</b></div></div>
       <div className="save-status">{saving ? "Menyimpan hasil petualangan..." : saved ? "✓ Hasil berhasil disimpan." : "Nilai tampil di perangkat ini. Penyimpanan server belum berhasil atau belum dikonfigurasi."}</div>
       <div className="hero-actions centered"><button className="primary" onClick={() => setScreen("map")}>Lihat Peta Petualangan</button><button className="secondary" onClick={resetAdventure}><RotateCcw size={16} /> Ulangi Petualangan</button></div>
     </section>}
 
-    {screen !== "map" && screen !== "learn" && screen !== "quiz" && screen !== "position-result" && screen !== "result" && <section id="cara-bermain" className="how-section"><span className="eyebrow">BELAJAR SAMBIL BERMAIN</span><h2>Bagaimana cara bermain?</h2><div className="how-grid"><div><span>01</span><b>Masuk sebagai detektif</b><p>Isi nama dan kode kelas untuk memulai petualangan.</p></div><div><span>02</span><b>Ikuti tujuh pos</b><p>Selesaikan pos secara berurutan. Pos berikutnya terbuka setelah pos sebelumnya selesai.</p></div><div><span>03</span><b>Pelajari dan jawab</b><p>Amati ilustrasi, pelajari materi, lalu kerjakan tantangan.</p></div><div><span>04</span><b>Lihat pencapaian</b><p>Periksa nilai setiap pos dan nilai keseluruhan setelah tantangan final.</p></div></div></section>}
-    <footer><b>Detektif Arab</b><span>مُغَامَرَةُ اللُّغَةِ الْعَرَبِيَّةِ</span><small>Media pembelajaran bahasa Arab • Kelas VII</small></footer>
+    <footer><b>Detektif Arab</b><span>الاِسْمُ وَالْفِعْلُ</span><small>Media pembelajaran bahasa Arab • Kelas VII</small></footer>
   </main>;
 }
